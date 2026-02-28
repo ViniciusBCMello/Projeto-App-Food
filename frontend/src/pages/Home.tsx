@@ -1,4 +1,4 @@
-export default function Home() {
+function Home() {
   const maisPedidos = [
     { id: 1, name: "X-Burguer", price: 29.9, image: "https://picsum.photos/200/150?random=11" },
     { id: 2, name: "Pizza Calabresa", price: 44.9, image: "https://picsum.photos/200/150?random=12" },
@@ -131,3 +131,5 @@ export default function Home() {
     </div>
   );
 }
+
+export default Home
