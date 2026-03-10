@@ -1,0 +1,94 @@
+FASE 1 — Base do Projeto
+
+Objetivo: projeto rodando, banco criado, login funcionando
+
+
+Criar estrutura de pastas
+Instalar dependências (requirements.txt)
+Configurar .env e config.py
+Criar o app/__init__.py (factory)
+Criar todos os models (User, Produto, Pedido, etc.)
+Rodar flask db init → migrate → upgrade
+Criar o sistema de licença e os comandos CLI (flask licenca instalar, flask setup seed)
+Criar login/logout com rate limit
+Criar o base.html com navbar
+✅ Testar: consegue fazer login e ver o dashboard em branco
+
+
+FASE 2 — Produtos
+
+Objetivo: cadastrar e gerenciar o cardápio
+
+
+Listar produtos (/produtos/)
+Criar produto (/produtos/novo)
+Editar produto
+Ativar/desativar produto (toggle)
+Categorias (listar, criar, editar)
+Upload de imagem do produto
+✅ Testar: cadastrar produto com categoria e imagem
+
+
+FASE 3 — Pedidos
+
+Objetivo: fluxo completo de um pedido
+
+
+Tela de novo pedido (selecionar produtos + quantidades)
+Cálculo do total em tempo real (JavaScript)
+Salvar pedido no banco
+Listar pedidos com filtro por status
+Detalhe do pedido
+Alterar status do pedido
+Cancelar pedido (com motivo)
+✅ Testar: criar pedido do zero até marcar como entregue
+
+
+FASE 4 — Usuários e Permissões
+
+Objetivo: controle de quem pode fazer o quê
+
+
+Listar usuários
+Criar usuário com papel (dono/gerente/atendente/financeiro)
+Editar usuário / resetar senha
+Ativar/desativar usuário
+Proteger as rotas com @requer_papel
+✅ Testar: criar um atendente que não consegue acessar configurações
+
+
+FASE 5 — Configurações White-Label
+
+Objetivo: cada cliente personaliza a sua instalação
+
+
+Formulário de configurações (nome, CNPJ, cores)
+Upload de logo
+Aplicar cor primária dinamicamente no CSS
+Mostrar nome/logo da empresa na navbar
+✅ Testar: trocar nome e cor e ver refletir em toda a interface
+
+
+FASE 6 — Relatórios e Auditoria
+
+Objetivo: visibilidade do negócio
+
+
+Relatório de vendas por período
+Totais por forma de pagamento
+Produtos mais vendidos
+Log de auditoria (quem fez o quê)
+✅ Testar: gerar relatório do dia e ver o log de alterações
+
+
+FASE 7 — Ajustes Finais para Produção
+
+Objetivo: sistema pronto para entregar ao cliente
+
+
+Tratamento de erros (páginas 403, 404, 500)
+Validações de formulário mais robustas
+HTTPS (configurar no servidor)
+Trocar SQLite por PostgreSQL
+Script de backup do banco
+✅ Deploy no servidor do cliente
