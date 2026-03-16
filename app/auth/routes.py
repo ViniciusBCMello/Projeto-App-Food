@@ -1,9 +1,12 @@
+import email
+
 from flask import request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from datetime import datetime, timezone
 from app.auth import bp
 from app.models import User
 from app import limiter, db
+from app.utils.validacoes import validar_email
 
 
 @bp.route("/login", methods=["POST"])
@@ -17,6 +20,9 @@ def login():
 
     if not user or not user.check_senha(senha) or not user.ativo:
         return jsonify({"erro": "E-mail ou senha incorretos."}), 401
+
+    if not validar_email(email):
+        return jsonify({"erro": "E-mail inválido."}), 400
 
     token = create_access_token(identity=str(user.id))
 

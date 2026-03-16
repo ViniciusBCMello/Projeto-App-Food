@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from flask_login import UserMixin
 from app import db, bcrypt
 
+
 class User(UserMixin, db.Model):
     __tablename__ = "users"
 
@@ -15,7 +16,7 @@ class User(UserMixin, db.Model):
     cpf = db.Column(db.String(14), nullable=False, unique=True)
     nascimento = db.Column(db.Date, nullable=True)
     ativo = db.Column(db.Boolean, default=True)
-    criador_em = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    criado_em = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
 
     pedidos = db.relationship("Pedido", foreign_keys="Pedido.user_id", backref="cliente", lazy=True)
@@ -139,6 +140,7 @@ class ItemPedido(db.Model):
     def subtotal(self):
         return self.quantidade * self.preco_unitario
     
+
 class Licenca(db.Model):
     __tablename__ = "licencas"
 
@@ -203,6 +205,7 @@ class FormaPagamento(db.Model):
     dias_para_recebimento     = db.Column(db.Integer, default=0)
     ativo                     = db.Column(db.Boolean, default=True)
 
+
 class Banco(db.Model):
     """Cadastro de Bancos."""
     __tablename__ = "bancos"
@@ -210,6 +213,7 @@ class Banco(db.Model):
     id              = db.Column(db.Integer, primary_key=True)
     nome            = db.Column(db.String(100), nullable=False)
     codigo_febraban = db.Column(db.String(10), nullable=True)
+
 
 class Fornecedor(db.Model):
     """Cadastro de Fornecedores."""
@@ -221,6 +225,7 @@ class Fornecedor(db.Model):
     email    = db.Column(db.String(120), nullable=True)
     cnpj     = db.Column(db.String(18), nullable=True, unique=True)
     ativo    = db.Column(db.Boolean, default=True)
+
 
 class TransacaoFinanceira(db.Model):
     """Centraliza Contas a Pagar, Contas a Receber, Despesas e Receitas. Alimenta todo o módulo de relatórios financeiros do ERP."""
