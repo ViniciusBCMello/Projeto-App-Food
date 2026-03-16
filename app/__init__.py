@@ -61,6 +61,9 @@ def create_app():
     from app.pedidos import bp as pedidos_bp
     app.register_blueprint(pedidos_bp, url_prefix="/pedidos")
 
+    from app.usuarios import bp as usuarios_bp
+    app.register_blueprint(usuarios_bp, url_prefix="/usuarios")
+
     # cli
     from app.cli import registrar_comandos
     registrar_comandos(app)
