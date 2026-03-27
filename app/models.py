@@ -181,6 +181,16 @@ class Empresa(db.Model):
     taxa_por_km   = db.Column(db.Numeric(10, 2), default=0.00)
     ativo         = db.Column(db.Boolean, default=True)
 
+    # White-label
+    wl_nome_sistema   = db.Column(db.String(100))
+    wl_cor_primaria   = db.Column(db.String(7), default="#C41E1E")
+    wl_cor_secundaria = db.Column(db.String(7), default="#0F0A0A")
+    wl_logo_url       = db.Column(db.String(255))
+    wl_dominio        = db.Column(db.String(100))
+    wl_suporte_email  = db.Column(db.String(120))
+    wl_suporte_fone   = db.Column(db.String(20))
+    wl_rodape_texto   = db.Column(db.String(255))
+
 
 class MotoboyDetalhe(db.Model):
     """Cadastro de Motoboy (Dados complementares para users com cargo 'motoboy')."""
@@ -247,3 +257,4 @@ class TransacaoFinanceira(db.Model):
     fornecedor_id      = db.Column(db.Integer, db.ForeignKey("fornecedores.id"), nullable=True)
     favorecido_id      = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     criado_em          = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    favorecido         = db.relationship("User", foreign_keys=[favorecido_id])

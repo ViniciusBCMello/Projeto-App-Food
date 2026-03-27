@@ -64,6 +64,12 @@ def create_app():
     from app.usuarios import bp as usuarios_bp
     app.register_blueprint(usuarios_bp, url_prefix="/usuarios")
 
+    from app.empresa import bp as empresa_bp
+    app.register_blueprint(empresa_bp, url_prefix="/empresa")
+
+    from app.financeiro import bp as financeiro_bp
+    app.register_blueprint(financeiro_bp, url_prefix="/financeiro")
+
     # cli
     from app.cli import registrar_comandos
     registrar_comandos(app)
