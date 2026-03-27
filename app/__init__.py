@@ -19,14 +19,24 @@ jwt = JWTManager()
 def create_app():
     app = Flask(__name__)
 
+
+    database_url = os.environ.get("DATABASE_URL", "sqlite:///dev.db")
+
+    # Render usa postgres://, SQLAlchemy exige postgresql://
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///dev.db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", "jwt-secret")
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 3600  # 1 hora
-    app.config["UPLOAD_FOLDER"] = os.environ.get("UPLOAD_FOLDER", "app/uploads/produtos")
+    app.config["UPLOAD_FOLDER"] = os.environ.get("UPLOAD_FOLDER", os.path.join(app.root_path, "uploads"))
+    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
     app.config["MAX_CONTENT_LENGTH"] = int(os.environ.get("MAX_CONTENT_LENGTH", 5242880))
     app.config["JSON_ENSURE_ASCII"] = False
+
 
     # Inicializa as extensões
     db.init_app(app)
