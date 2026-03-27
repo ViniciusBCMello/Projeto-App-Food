@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZentraFood — API Tester</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #0F0A0A;
+  --card:    #1A1010;
+  --surface: #2A1A1A;
+  --rim:     rgba(255,255,255,0.07);
+  --r-core:  #C41E1E;
+  --r-mid:   #D93030;
+  --r-light: #F07070;
+  --r-pale:  rgba(196,30,30,0.12);
+  --gold:    #C9A96E;
+  --ivory:   #F5EDE8;
+  --muted:   rgba(245,237,232,0.45);
+  --green:   #22C55E;
+  --yellow:  #EAB308;
+  --blue:    #3B82F6;
+  --font-d:  'Syne', sans-serif;
+  --font-b:  'DM Sans', sans-serif;
+  --font-m:  'DM Mono', monospace;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; }
+body { background:var(--bg); color:var(--ivory); font-family:var(--font-b); overflow:hidden; display:flex; flex-direction:column; }
+
+/* LOGIN */
+#login-screen {
+  display:flex; align-items:center; justify-content:center;
+  height:100vh;
+  background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(140,26,26,0.3) 0%, transparent 70%);
+}
+.login-box {
+  background:var(--card);
+  border:1px solid var(--rim);
+  border-radius:20px;
+  padding:48px;
+  width:380px;
+}
+.login-logo {
+  font-family:var(--font-d);
+  font-size:28px; font-weight:800;
+  margin-bottom:8px;
+  color:var(--ivory);
+}
+.login-logo span { color:var(--r-core); font-style:italic; }
+.login-sub { font-size:13px; color:var(--muted); margin-bottom:32px; font-family:var(--font-m); letter-spacing:1px; }
+.field { margin-bottom:16px; }
+.field label { display:block; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+.field input {
+  width:100%; background:var(--surface); border:1px solid var(--rim);
+  border-radius:8px; padding:11px 14px; color:var(--ivory);
+  font-family:var(--font-b); font-size:14px; outline:none;
+  transition:border-color 0.2s;
+}
+.field input:focus { border-color:var(--r-core); box-shadow:0 0 0 3px rgba(196,30,30,0.1); }
+.btn-primary {
+  width:100%; background:var(--r-core); color:white; border:none;
+  padding:13px; border-radius:8px; font-family:var(--font-b);
+  font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s;
+  margin-top:8px;
+}
+.btn-primary:hover { background:var(--r-mid); box-shadow:0 8px 24px rgba(196,30,30,0.35); }
+.login-hint { font-size:12px; color:var(--muted); margin-top:16px; text-align:center; font-family:var(--font-m); }
+
+/* APP SHELL */
+#app { display:none; height:100vh; flex-direction:row; }
+
+/* SIDEBAR */
+.sidebar {
+  width:220px; min-width:220px;
+  background:var(--card);
+  border-right:1px solid var(--rim);
+  display:flex; flex-direction:column;
+  overflow-y:auto;
+}
+.sidebar-logo {
+  padding:20px 20px 16px;
+  font-family:var(--font-d); font-size:18px; font-weight:800;
+  border-bottom:1px solid var(--rim);
+  color:var(--ivory);
+}
+.sidebar-logo span { color:var(--r-core); font-style:italic; }
+.sidebar-sub { font-size:9px; color:var(--muted); font-family:var(--font-m); letter-spacing:2px; margin-top:2px; }
+.sidebar-group { padding:16px 12px 4px; }
+.sidebar-group-label {
+  font-size:9px; letter-spacing:3px; text-transform:uppercase;
+  color:var(--muted); padding:0 8px; margin-bottom:4px;
+  font-family:var(--font-m);
+}
+.nav-btn {
+  display:flex; align-items:center; gap:9px;
+  width:100%; padding:9px 10px; border:none; background:transparent;
+  color:var(--muted); font-family:var(--font-b); font-size:13px;
+  font-weight:500; cursor:pointer; border-radius:8px;
+  text-align:left; transition:all 0.15s; margin-bottom:2px;
+}
+.nav-btn:hover { background:var(--surface); color:var(--ivory); }
+.nav-btn.active { background:var(--r-pale); color:var(--r-light); font-weight:600; }
+.nav-btn .icon { font-size:15px; width:20px; text-align:center; }
+
+.sidebar-user {
+  margin-top:auto; padding:16px;
+  border-top:1px solid var(--rim);
+  font-size:12px;
+}
+.user-name { font-weight:600; color:var(--ivory); }
+.user-cargo { color:var(--gold); font-family:var(--font-m); font-size:10px; letter-spacing:1px; margin-top:2px; }
+.btn-logout {
+  margin-top:10px; width:100%; padding:8px;
+  background:transparent; border:1px solid var(--rim);
+  color:var(--muted); font-family:var(--font-b); font-size:12px;
+  border-radius:6px; cursor:pointer; transition:all 0.2s;
+}
+.btn-logout:hover { border-color:var(--r-core); color:var(--r-light); }
+
+/* MAIN */
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+
+.topbar {
+  padding:16px 28px;
+  border-bottom:1px solid var(--rim);
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--card);
+}
+.page-title { font-family:var(--font-d); font-size:18px; font-weight:700; }
+.base-url-badge {
+  font-family:var(--font-m); font-size:11px;
+  background:var(--surface); border:1px solid var(--rim);
+  padding:6px 12px; border-radius:6px; color:var(--gold);
+}
+
+.content { flex:1; overflow-y:auto; padding:24px 28px; }
+
+/* PANELS */
+.panel { display:none; }
+.panel.active { display:block; }
+
+/* ROUTE CARD */
+.route-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@media (max-width:900px) { .route-grid { grid-template-columns:1fr; } }
+
+.route-card {
+  background:var(--card); border:1px solid var(--rim);
+  border-radius:14px; overflow:hidden;
+  transition:border-color 0.2s;
+}
+.route-card:hover { border-color:rgba(196,30,30,0.3); }
+
+.route-header {
+  padding:14px 18px;
+  display:flex; align-items:center; gap:10px;
+  border-bottom:1px solid var(--rim);
+  cursor:pointer; user-select:none;
+}
+.route-header:hover { background:var(--surface); }
+
+.method {
+  font-family:var(--font-m); font-size:10px; font-weight:500;
+  padding:3px 8px; border-radius:5px; letter-spacing:1px;
+  flex-shrink:0;
+}
+.GET    { background:rgba(34,197,94,0.15);  color:#4ADE80; border:1px solid rgba(34,197,94,0.2); }
+.POST   { background:rgba(59,130,246,0.15); color:#60A5FA; border:1px solid rgba(59,130,246,0.2); }
+.PUT    { background:rgba(234,179,8,0.15);  color:#FCD34D; border:1px solid rgba(234,179,8,0.2); }
+.DELETE { background:rgba(196,30,30,0.15);  color:#F07070; border:1px solid rgba(196,30,30,0.2); }
+.PATCH  { background:rgba(168,85,247,0.15); color:#C084FC; border:1px solid rgba(168,85,247,0.2); }
+
+.route-path { font-family:var(--font-m); font-size:12px; color:var(--ivory); }
+.route-desc { font-size:12px; color:var(--muted); margin-left:auto; }
+
+.route-body { padding:16px 18px; }
+
+.input-row { display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+.input-sm {
+  flex:1; min-width:80px;
+  background:var(--surface); border:1px solid var(--rim);
+  border-radius:6px; padding:8px 10px; color:var(--ivory);
+  font-family:var(--font-m); font-size:12px; outline:none;
+  transition:border-color 0.2s;
+}
+.input-sm:focus { border-color:var(--r-core); }
+.input-sm::placeholder { color:var(--muted); }
+
+textarea.input-sm {
+  resize:vertical; min-height:80px;
+  font-size:11px; line-height:1.5;
+}
+
+.btn-run {
+  padding:8px 16px; background:var(--r-core); color:white;
+  border:none; border-radius:6px; font-family:var(--font-b);
+  font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s;
+  white-space:nowrap;
+}
+.btn-run:hover { background:var(--r-mid); }
+.btn-run:disabled { opacity:0.5; cursor:not-allowed; }
+
+.response-box {
+  margin-top:10px;
+  background:var(--surface); border-radius:8px;
+  border:1px solid var(--rim); overflow:hidden;
+  display:none;
+}
+.response-box.show { display:block; }
+
+.res-header {
+  padding:8px 12px; border-bottom:1px solid var(--rim);
+  display:flex; align-items:center; gap:8px;
+  font-family:var(--font-m); font-size:11px;
+}
+.status-badge { padding:2px 8px; border-radius:4px; font-weight:500; }
+.s-ok  { background:rgba(34,197,94,0.15);  color:#4ADE80; }
+.s-err { background:rgba(196,30,30,0.15);  color:#F07070; }
+.s-warn{ background:rgba(234,179,8,0.15);  color:#FCD34D; }
+
+.res-body {
+  padding:12px;
+  font-family:var(--font-m); font-size:11px;
+  color:var(--ivory); line-height:1.6;
+  max-height:220px; overflow-y:auto;
+  white-space:pre-wrap; word-break:break-all;
+}
+
+/* SECTION TITLE */
+.section-head {
+  margin-bottom:20px;
+}
+.section-head h2 {
+  font-family:var(--font-d); font-size:20px; font-weight:700;
+  margin-bottom:4px;
+}
+.section-head p { font-size:13px; color:var(--muted); }
+
+/* TOKEN STATUS */
+.token-status {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 12px; border-radius:100px;
+  font-family:var(--font-m); font-size:11px;
+}
+.ts-ok   { background:rgba(34,197,94,0.1);  color:#4ADE80; border:1px solid rgba(34,197,94,0.2); }
+.ts-none { background:rgba(234,179,8,0.1);  color:#FCD34D; border:1px solid rgba(234,179,8,0.2); }
+.ts-dot  { width:6px; height:6px; border-radius:50%; background:currentColor; }
+
+/* OVERVIEW CARDS */
+.overview-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px; margin-bottom:28px; }
+.ov-card {
+  background:var(--card); border:1px solid var(--rim);
+  border-radius:12px; padding:20px;
+  cursor:pointer; transition:all 0.2s;
+}
+.ov-card:hover { border-color:rgba(196,30,30,0.4); transform:translateY(-2px); }
+.ov-icon { font-size:24px; margin-bottom:10px; }
+.ov-label { font-family:var(--font-m); font-size:9px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; }
+.ov-count { font-family:var(--font-d); font-size:22px; font-weight:700; color:var(--ivory); margin-top:4px; }
+.ov-count span { color:var(--r-light); }
+
+/* Tabs */
+.tabs { display:flex; gap:4px; margin-bottom:20px; border-bottom:1px solid var(--rim); padding-bottom:0; }
+.tab-btn {
+  padding:8px 16px; border:none; background:transparent;
+  color:var(--muted); font-family:var(--font-b); font-size:13px;
+  font-weight:500; cursor:pointer; border-bottom:2px solid transparent;
+  transition:all 0.15s; margin-bottom:-1px;
+}
+.tab-btn.active { color:var(--r-light); border-bottom-color:var(--r-core); font-weight:600; }
+.tab-btn:hover { color:var(--ivory); }
+
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--surface); border-radius:10px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Zentra<span>Food</span></div>
+    <div class="login-sub">API TESTER — DEV</div>
+    <div class="field">
+      <label>URL da API</label>
+      <input id="base-url" type="text" value="http://localhost:5000" placeholder="http://localhost:5000">
+    </div>
+    <div class="field">
+      <label>E-mail</label>
+      <input id="login-email" type="email" value="admin@sistema.com" placeholder="admin@sistema.com">
+    </div>
+    <div class="field">
+      <label>Senha</label>
+      <input id="login-pass" type="password" value="admin1234" placeholder="••••••••">
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Entrar →</button>
+    <div class="login-hint"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a2c3c6cfcbcce2d1cbd1d6c7cfc38cc1cdcf">[email&#160;protected]</a> / admin1234</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      ZF<span>.</span>
+      <div class="sidebar-sub">API TESTER</div>
+    </div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Geral</div>
+      <button class="nav-btn active" onclick="showPanel('overview')">
+        <span class="icon">🏠</span> Overview
+      </button>
+    </div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Auth</div>
+      <button class="nav-btn" onclick="showPanel('auth')">
+        <span class="icon">🔐</span> Autenticação
+      </button>
+    </div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Cardápio</div>
+      <button class="nav-btn" onclick="showPanel('categorias')">
+        <span class="icon">🗂️</span> Categorias
+      </button>
+      <button class="nav-btn" onclick="showPanel('produtos')">
+        <span class="icon">📦</span> Produtos
+      </button>
+    </div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Clientes</div>
+      <button class="nav-btn" onclick="showPanel('enderecos')">
+        <span class="icon">📍</span> Endereços
+      </button>
+      <button class="nav-btn" onclick="showPanel('pedidos')">
+        <span class="icon">🛒</span> Pedidos
+      </button>
+    </div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Administração</div>
+      <button class="nav-btn" onclick="showPanel('usuarios')">
+        <span class="icon">👥</span> Usuários
+      </button>
+    </div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Configurações</div>
+      <button class="nav-btn" onclick="showPanel('empresa')">
+        <span class="icon">🏢</span> Empresa
+      </button>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-name" id="sb-name">—</div>
+      <div class="user-cargo" id="sb-cargo">—</div>
+      <button class="btn-logout" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="page-title" id="page-title">Overview</div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div id="token-indicator" class="token-status ts-none">
+          <span class="ts-dot"></span> Sem token
+        </div>
+        <div class="base-url-badge" id="url-display">localhost:5000</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- OVERVIEW -->
+      <div class="panel active" id="panel-overview">
+        <div class="section-head">
+          <h2>Bem-vindo ao API Tester</h2>
+          <p>Selecione um módulo no menu para testar as rotas. Token JWT é gerenciado automaticamente após o login.</p>
+        </div>
+        <div class="overview-grid">
+          <div class="ov-card" onclick="showPanel('auth')">
+            <div class="ov-icon">🔐</div>
+            <div class="ov-label">Auth</div>
+            <div class="ov-count"><span>2</span> rotas</div>
+          </div>
+          <div class="ov-card" onclick="showPanel('categorias')">
+            <div class="ov-icon">🗂️</div>
+            <div class="ov-label">Categorias</div>
+            <div class="ov-count"><span>4</span> rotas</div>
+          </div>
+          <div class="ov-card" onclick="showPanel('produtos')">
+            <div class="ov-icon">📦</div>
+            <div class="ov-label">Produtos</div>
+            <div class="ov-count"><span>5</span> rotas</div>
+          </div>
+          <div class="ov-card" onclick="showPanel('enderecos')">
+            <div class="ov-icon">📍</div>
+            <div class="ov-label">Endereços</div>
+            <div class="ov-count"><span>5</span> rotas</div>
+          </div>
+          <div class="ov-card" onclick="showPanel('pedidos')">
+            <div class="ov-icon">🛒</div>
+            <div class="ov-label">Pedidos</div>
+            <div class="ov-count"><span>6</span> rotas</div>
+          </div>
+          <div class="ov-card" onclick="showPanel('usuarios')">
+            <div class="ov-icon">👥</div>
+            <div class="ov-label">Usuários</div>
+            <div class="ov-count"><span>7</span> rotas</div>
+          </div>
+          <div class="ov-card" onclick="showPanel('empresa')">
+            <div class="ov-icon">🏢</div>
+            <div class="ov-label">Empresa</div>
+            <div class="ov-count"><span>11</span> rotas</div>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--rim);border-radius:12px;padding:20px">
+          <div style="font-family:var(--font-m);font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:12px">COMO INTEGRAR COM A API</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.8">
+            <strong style="color:var(--ivory)">1. CORS:</strong> Certifique-se que o Flask está rodando com <code style="font-family:var(--font-m);color:var(--r-light)">CORS(app)</code> habilitado.<br>
+            <strong style="color:var(--ivory)">2. Token:</strong> Após login, o token JWT é salvo e enviado automaticamente em todas as requisições.<br>
+            <strong style="color:var(--ivory)">3. Header:</strong> Todas as rotas protegidas recebem <code style="font-family:var(--font-m);color:var(--r-light)">Authorization: Bearer &lt;token&gt;</code><br>
+            <strong style="color:var(--ivory)">4. Content-Type:</strong> Requisições JSON usam <code style="font-family:var(--font-m);color:var(--r-light)">Content-Type: application/json</code><br>
+            <strong style="color:var(--ivory)">5. Uploads:</strong> Criação de produto usa <code style="font-family:var(--font-m);color:var(--r-light)">multipart/form-data</code> (sem Content-Type manual)
+          </div>
+        </div>
+      </div>
+
+      <!-- AUTH -->
+      <div class="panel" id="panel-auth">
+        <div class="section-head">
+          <h2>Autenticação</h2>
+          <p>Login e dados do usuário logado.</p>
+        </div>
+        <div class="route-grid">
+          <!-- Login -->
+          <div class="route-card">
+            <div class="route-header" onclick="toggleCard(this)">
+              <span class="method POST">POST</span>
+              <span class="route-path">/auth/login</span>
+              <span class="route-desc">Login</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="a-email" placeholder="E-mail" value="admin@sistema.com">
+                <input class="input-sm" id="a-pass" type="password" placeholder="Senha" value="admin1234">
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="runLogin()">Enviar</button>
+              </div>
+              <div class="response-box" id="res-login"></div>
+            </div>
+          </div>
+          <!-- Me -->
+          <div class="route-card">
+            <div class="route-header" onclick="toggleCard(this)">
+              <span class="method GET">GET</span>
+              <span class="route-path">/auth/me</span>
+              <span class="route-desc">Usuário logado</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <button class="btn-run" onclick="req('GET','/auth/me',null,'res-me')">Enviar</button>
+              </div>
+              <div class="response-box" id="res-me"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CATEGORIAS -->
+      <div class="panel" id="panel-categorias">
+        <div class="section-head">
+          <h2>Categorias</h2>
+          <p>Gerenciamento de categorias do cardápio.</p>
+        </div>
+        <div class="route-grid">
+          <div class="route-card">
+            <div class="route-header" onclick="toggleCard(this)">
+              <span class="method GET">GET</span>
+              <span class="route-path">/produtos/categorias</span>
+              <span class="route-desc">Listar</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <button class="btn-run" onclick="req('GET','/produtos/categorias',null,'res-cat-list')">Enviar</button>
+              </div>
+              <div class="response-box" id="res-cat-list"></div>
+            </div>
+          </div>
+          <div class="route-card">
+            <div class="route-header" onclick="toggleCard(this)">
+              <span class="method POST">POST</span>
+              <span class="route-path">/produtos/categorias</span>
+              <span class="route-desc">Criar</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="cat-nome" placeholder="Nome da categoria">
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="req('POST','/produtos/categorias',{nome:v('cat-nome')},'res-cat-create')">Enviar</button>
+              </div>
+              <div class="response-box" id="res-cat-create"></div>
+            </div>
+          </div>
+          <div class="route-card">
+            <div class="route-header" onclick="toggleCard(this)">
+              <span class="method PUT">PUT</span>
+              <span class="route-path">/produtos/categorias/:id</span>
+              <span class="route-desc">Editar</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="cat-edit-id" placeholder="ID" style="max-width:70px">
+                <input class="input-sm" id="cat-edit-nome" placeholder="Novo nome">
+                <input class="input-sm" id="cat-edit-ativa" placeholder="ativa (true/false)" style="max-width:130px">
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="req('PUT','/produtos/categorias/'+v('cat-edit-id'),{nome:v('cat-edit-nome'),ativa:v('cat-edit-ativa')==='true'},'res-cat-edit')">Enviar</button>
+              </div>
+              <div class="response-box" id="res-cat-edit"></div>
+            </div>
+          </div>
+          <div class="route-card">
+            <div class="route-header" onclick="toggleCard(this)">
+              <span class="method DELETE">DELETE</span>
+              <span class="route-path">/produtos/categorias/:id</span>
+              <span class="route-desc">Excluir</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="cat-del-id" placeholder="ID" style="max-width:80px">
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="req('DELETE','/produtos/categorias/'+v('cat-del-id'),null,'res-cat-del')">Enviar</button>
+              </div>
+              <div class="response-box" id="res-cat-del"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUTOS -->
+      <div class="panel" id="panel-produtos">
+        <div class="section-head">
+          <h2>Produtos</h2>
+          <p>CRUD de produtos. Upload de imagem via form-data.</p>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('produtos','list')">Listar</button>
+          <button class="tab-btn" onclick="switchTab('produtos','get')">Detalhe</button>
+          <button class="tab-btn" onclick="switchTab('produtos','create')">Criar</button>
+          <button class="tab-btn" onclick="switchTab('produtos','edit')">Editar</button>
+          <button class="tab-btn" onclick="switchTab('produtos','delete')">Excluir</button>
+        </div>
+        <div class="tab-panel active" id="tp-produtos-list">
+          <div class="route-card">
+            <div class="route-header">
+              <span class="method GET">GET</span>
+              <span class="route-path">/produtos/</span>
+              <span class="route-desc">Listar todos</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="prod-cat-filter" placeholder="categoria_id (opcional)" style="max-width:200px">
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="req('GET','/produtos/'+(v('prod-cat-filter')?'?categoria_id='+v('prod-cat-filter'):''),null,'res-prod-list')">Enviar</button>
+              </div>
+              <div class="response-box" id="res-prod-list"></div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" id="tp-produtos-get">
+          <div class="route-card">
+            <div class="route-header">
+              <span class="method GET">GET</span>
+              <span class="route-path">/produtos/:id</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="prod-get-id" placeholder="ID do produto" style="max-width:120px">
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="req('GET','/produtos/'+v('prod-get-id'),null,'res-prod-get')">Enviar</button>
+              </div>
+              <div class="response-box" id="res-prod-get"></div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" id="tp-produtos-create">
+          <div class="route-card">
+            <div class="route-header">
+              <span class="method POST">POST</span>
+              <span class="route-path">/produtos/</span>
+              <span class="route-desc">form-data</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="pn-nome" placeholder="Nome *">
+                <input class="input-sm" id="pn-preco" placeholder="Preço *" type="number" step="0.01">
+              </div>
+              <div class="input-row">
+                <input class="input-sm" id="pn-desc" placeholder="Descrição">
+                <input class="input-sm" id="pn-cat" placeholder="categoria_id">
+              </div>
+              <div class="input-row">
+                <select class="input-sm" id="pn-disp" style="max-width:150px">
+                  <option value="true">Disponível</option>
+                  <option value="false">Indisponível</option>
+                </select>
+                <input class="input-sm" id="pn-img" type="file" accept="image/*" style="font-size:11px">
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="criarProduto()">Enviar</button>
+              </div>
+              <div class="response-box" id="res-prod-create"></div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" id="tp-produtos-edit">
+          <div class="route-card">
+            <div class="route-header">
+              <span class="method PUT">PUT</span>
+              <span class="route-path">/produtos/:id</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="pe-id" placeholder="ID *" style="max-width:80px">
+                <input class="input-sm" id="pe-nome" placeholder="Nome">
+                <input class="input-sm" id="pe-preco" placeholder="Preço" type="number" step="0.01">
+              </div>
+              <div class="input-row">
+                <input class="input-sm" id="pe-desc" placeholder="Descrição">
+                <select class="input-sm" id="pe-disp" style="max-width:150px">
+                  <option value="">Disponibilidade</option>
+                  <option value="true">Disponível</option>
+                  <option value="false">Indisponível</option>
+                </select>
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="editarProduto()">Enviar</button>
+              </div>
+              <div class="response-box" id="res-prod-edit"></div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" id="tp-produtos-delete">
+          <div class="route-card">
+            <div class="route-header">
+              <span class="method DELETE">DELETE</span>
+              <span class="route-path">/produtos/:id</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="pd-id" placeholder="ID" style="max-width:80px">
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="req('DELETE','/produtos/'+v('pd-id'),null,'res-prod-del')">Enviar</button>
+              </div>
+              <div class="response-box" id="res-prod-del"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ENDEREÇOS -->
+      <div class="panel" id="panel-enderecos">
+        <div class="section-head">
+          <h2>Endereços</h2>
+          <p>Endereços do usuário logado.</p>
+        </div>
+        <div class="route-grid">
+          <div class="route-card">
+            <div class="route-header" onclick="toggleCard(this)">
+              <span class="method GET">GET</span>
+              <span class="route-path">/enderecos/</span>
+              <span class="route-desc">Listar</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <button class="btn-run" onclick="req('GET','/enderecos/',null,'res-end-list')">Enviar</button>
+              </div>
+              <div class="response-box" id="res-end-list"></div>
+            </div>
+          </div>
+          <div class="route-card">
+            <div class="route-header" onclick="toggleCard(this)">
+              <span class="method POST">POST</span>
+              <span class="route-path">/enderecos/</span>
+              <span class="route-desc">Criar</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="en-apelido" placeholder="Apelido (ex: Casa)">
+                <input class="input-sm" id="en-cep" placeholder="CEP *">
+              </div>
+              <div class="input-row">
+                <input class="input-sm" id="en-logradouro" placeholder="Logradouro *">
+                <input class="input-sm" id="en-numero" placeholder="Número *" style="max-width:80px">
+              </div>
+              <div class="input-row">
+                <input class="input-sm" id="en-bairro" placeholder="Bairro *">
+                <input class="input-sm" id="en-cidade" placeholder="Cidade *">
+                <input class="input-sm" id="en-estado" placeholder="UF *" style="max-width:60px">
+              </div>
+              <div class="input-row">
+                <input class="input-sm" id="en-complemento" placeholder="Complemento">
+                <input class="input-sm" id="en-referencia" placeholder="Referência">
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="criarEndereco()">Enviar</button>
+              </div>
+              <div class="response-box" id="res-end-create"></div>
+            </div>
+          </div>
+          <div class="route-card">
+            <div class="route-header" onclick="toggleCard(this)">
+              <span class="method PATCH">PATCH</span>
+              <span class="route-path">/enderecos/:id/principal</span>
+              <span class="route-desc">Definir principal</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="en-principal-id" placeholder="ID" style="max-width:80px">
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="req('PATCH','/enderecos/'+v('en-principal-id')+'/principal',{},'res-end-principal')">Enviar</button>
+              </div>
+              <div class="response-box" id="res-end-principal"></div>
+            </div>
+          </div>
+          <div class="route-card">
+            <div class="route-header" onclick="toggleCard(this)">
+              <span class="method DELETE">DELETE</span>
+              <span class="route-path">/enderecos/:id</span>
+              <span class="route-desc">Excluir</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="en-del-id" placeholder="ID" style="max-width:80px">
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="req('DELETE','/enderecos/'+v('en-del-id'),null,'res-end-del')">Enviar</button>
+              </div>
+              <div class="response-box" id="res-end-del"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PEDIDOS -->
+      <div class="panel" id="panel-pedidos">
+        <div class="section-head">
+          <h2>Pedidos</h2>
+          <p>Criação e gerenciamento do fluxo de pedidos.</p>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('pedidos','list')">Listar</button>
+          <button class="tab-btn" onclick="switchTab('pedidos','get')">Detalhe</button>
+          <button class="tab-btn" onclick="switchTab('pedidos','create')">Criar</button>
+          <button class="tab-btn" onclick="switchTab('pedidos','status')">Status</button>
+          <button class="tab-btn" onclick="switchTab('pedidos','entrega')">Entrega</button>
+          <button class="tab-btn" onclick="switchTab('pedidos','cancelar')">Cancelar</button>
+        </div>
+        <div class="tab-panel active" id="tp-pedidos-list">
+          <div class="route-card">
+            <div class="route-header">
+              <span class="method GET">GET</span>
+              <span class="route-path">/pedidos/</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <select class="input-sm" id="ped-status-filter" style="max-width:180px">
+                  <option value="">Todos os status</option>
+                  <option>aguardando</option>
+                  <option>em_preparo</option>
+                  <option>pronto</option>
+                  <option>saiu_entrega</option>
+                  <option>cheguei</option>
+                  <option>cancelado</option>
+                </select>
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="req('GET','/pedidos/'+(v('ped-status-filter')?'?status='+v('ped-status-filter'):''),null,'res-ped-list')">Enviar</button>
+              </div>
+              <div class="response-box" id="res-ped-list"></div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" id="tp-pedidos-get">
+          <div class="route-card">
+            <div class="route-header">
+              <span class="method GET">GET</span>
+              <span class="route-path">/pedidos/:id</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="ped-get-id" placeholder="ID do pedido" style="max-width:120px">
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="req('GET','/pedidos/'+v('ped-get-id'),null,'res-ped-get')">Enviar</button>
+              </div>
+              <div class="response-box" id="res-ped-get"></div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" id="tp-pedidos-create">
+          <div class="route-card">
+            <div class="route-header">
+              <span class="method POST">POST</span>
+              <span class="route-path">/pedidos/</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="ped-end-id" placeholder="endereco_id *" style="max-width:120px">
+                <select class="input-sm" id="ped-pagamento" style="max-width:180px">
+                  <option>pix</option>
+                  <option>dinheiro</option>
+                  <option>cartao_credito</option>
+                  <option>cartao_debito</option>
+                </select>
+              </div>
+              <div class="input-row">
+                <input class="input-sm" id="ped-obs" placeholder="Observações (opcional)">
+              </div>
+              <textarea class="input-sm" id="ped-itens" placeholder='Itens JSON:&#10;[{"produto_id":1,"quantidade":2},{"produto_id":2,"quantidade":1}]'></textarea>
+              <div class="input-row" style="margin-top:8px">
+                <button class="btn-run" onclick="criarPedido()">Enviar</button>
+              </div>
+              <div class="response-box" id="res-ped-create"></div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" id="tp-pedidos-status">
+          <div class="route-card">
+            <div class="route-header">
+              <span class="method PATCH">PATCH</span>
+              <span class="route-path">/pedidos/:id/status</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="ped-st-id" placeholder="ID" style="max-width:80px">
+                <select class="input-sm" id="ped-st-val">
+                  <option>aguardando</option>
+                  <option>em_preparo</option>
+                  <option>pronto</option>
+                  <option>saiu_entrega</option>
+                  <option>cheguei</option>
+                </select>
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="req('PATCH','/pedidos/'+v('ped-st-id')+'/status',{status:v('ped-st-val')},'res-ped-st')">Enviar</button>
+              </div>
+              <div class="response-box" id="res-ped-st"></div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" id="tp-pedidos-entrega">
+          <div class="route-card">
+            <div class="route-header">
+              <span class="method PATCH">PATCH</span>
+              <span class="route-path">/pedidos/:id/entrega</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="ped-ent-id" placeholder="ID" style="max-width:80px">
+                <select class="input-sm" id="ped-ent-val" style="max-width:160px">
+                  <option value="true">Entregue ✓</option>
+                  <option value="false">Não entregue ✗</option>
+                </select>
+              </div>
+              <div class="input-row">
+                <input class="input-sm" id="ped-ent-motivo" placeholder="Motivo (se não entregue)">
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="finalizarEntrega()">Enviar</button>
+              </div>
+              <div class="response-box" id="res-ped-ent"></div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" id="tp-pedidos-cancelar">
+          <div class="route-card">
+            <div class="route-header">
+              <span class="method PATCH">PATCH</span>
+              <span class="route-path">/pedidos/:id/cancelar</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="ped-can-id" placeholder="ID" style="max-width:80px">
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="req('PATCH','/pedidos/'+v('ped-can-id')+'/cancelar',{},'res-ped-can')">Enviar</button>
+              </div>
+              <div class="response-box" id="res-ped-can"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- USUÁRIOS -->
+      <div class="panel" id="panel-usuarios">
+        <div class="section-head">
+          <h2>Usuários</h2>
+          <p>Gerenciamento de funcionários e perfil.</p>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('usuarios','list')">Listar</button>
+          <button class="tab-btn" onclick="switchTab('usuarios','get')">Detalhe</button>
+          <button class="tab-btn" onclick="switchTab('usuarios','create')">Criar</button>
+          <button class="tab-btn" onclick="switchTab('usuarios','edit')">Editar</button>
+          <button class="tab-btn" onclick="switchTab('usuarios','toggle')">Ativar/Desativar</button>
+          <button class="tab-btn" onclick="switchTab('usuarios','perfil')">Meu Perfil</button>
+        </div>
+        <div class="tab-panel active" id="tp-usuarios-list">
+          <div class="route-card">
+            <div class="route-header">
+              <span class="method GET">GET</span>
+              <span class="route-path">/usuarios/</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <select class="input-sm" id="usr-cargo-filter" style="max-width:180px">
+                  <option value="">Todos os cargos</option>
+                  <option>dono</option>
+                  <option>administracao</option>
+                  <option>gerente</option>
+                  <option>atendente</option>
+                  <option>motoboy</option>
+                  <option>cliente</option>
+                </select>
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="req('GET','/usuarios/'+(v('usr-cargo-filter')?'?cargo='+v('usr-cargo-filter'):''),null,'res-usr-list')">Enviar</button>
+              </div>
+              <div class="response-box" id="res-usr-list"></div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" id="tp-usuarios-get">
+          <div class="route-card">
+            <div class="route-header">
+              <span class="method GET">GET</span>
+              <span class="route-path">/usuarios/:id</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="usr-get-id" placeholder="ID" style="max-width:80px">
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="req('GET','/usuarios/'+v('usr-get-id'),null,'res-usr-get')">Enviar</button>
+              </div>
+              <div class="response-box" id="res-usr-get"></div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" id="tp-usuarios-create">
+          <div class="route-card">
+            <div class="route-header">
+              <span class="method POST">POST</span>
+              <span class="route-path">/usuarios/</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="uc-nome" placeholder="Nome *">
+                <input class="input-sm" id="uc-email" placeholder="E-mail *" type="email">
+              </div>
+              <div class="input-row">
+                <input class="input-sm" id="uc-senha" placeholder="Senha * (min 8)" type="password">
+                <input class="input-sm" id="uc-cpf" placeholder="CPF *">
+              </div>
+              <div class="input-row">
+                <select class="input-sm" id="uc-cargo" style="max-width:160px">
+                  <option>atendente</option>
+                  <option>gerente</option>
+                  <option>motoboy</option>
+                  <option>administracao</option>
+                  <option>cliente</option>
+                  <option>dono</option>
+                </select>
+                <input class="input-sm" id="uc-tel" placeholder="Telefone">
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="criarUsuario()">Enviar</button>
+              </div>
+              <div class="response-box" id="res-usr-create"></div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" id="tp-usuarios-edit">
+          <div class="route-card">
+            <div class="route-header">
+              <span class="method PUT">PUT</span>
+              <span class="route-path">/usuarios/:id</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="ue-id" placeholder="ID *" style="max-width:80px">
+                <input class="input-sm" id="ue-nome" placeholder="Nome">
+                <input class="input-sm" id="ue-tel" placeholder="Telefone">
+              </div>
+              <div class="input-row">
+                <select class="input-sm" id="ue-cargo" style="max-width:160px">
+                  <option value="">Cargo (opcional)</option>
+                  <option>atendente</option>
+                  <option>gerente</option>
+                  <option>motoboy</option>
+                  <option>administracao</option>
+                  <option>cliente</option>
+                  <option>dono</option>
+                </select>
+                <input class="input-sm" id="ue-senha" placeholder="Nova senha (opcional)" type="password">
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="editarUsuario()">Enviar</button>
+              </div>
+              <div class="response-box" id="res-usr-edit"></div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" id="tp-usuarios-toggle">
+          <div class="route-card">
+            <div class="route-header">
+              <span class="method PATCH">PATCH</span>
+              <span class="route-path">/usuarios/:id/toggle-ativo</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="ut-id" placeholder="ID" style="max-width:80px">
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="req('PATCH','/usuarios/'+v('ut-id')+'/toggle-ativo',{},'res-usr-toggle')">Enviar</button>
+              </div>
+              <div class="response-box" id="res-usr-toggle"></div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" id="tp-usuarios-perfil">
+          <div class="route-grid">
+            <div class="route-card">
+              <div class="route-header">
+                <span class="method GET">GET</span>
+                <span class="route-path">/usuarios/perfil</span>
+              </div>
+              <div class="route-body">
+                <div class="input-row">
+                  <button class="btn-run" onclick="req('GET','/usuarios/perfil',null,'res-perfil-get')">Enviar</button>
+                </div>
+                <div class="response-box" id="res-perfil-get"></div>
+              </div>
+            </div>
+            <div class="route-card">
+              <div class="route-header">
+                <span class="method PUT">PUT</span>
+                <span class="route-path">/usuarios/perfil</span>
+              </div>
+              <div class="route-body">
+                <div class="input-row">
+                  <input class="input-sm" id="up-nome" placeholder="Novo nome">
+                  <input class="input-sm" id="up-tel" placeholder="Telefone">
+                </div>
+                <div class="input-row">
+                  <input class="input-sm" id="up-senha" placeholder="Nova senha (opcional)" type="password">
+                </div>
+                <div class="input-row">
+                  <button class="btn-run" onclick="editarPerfil()">Enviar</button>
+                </div>
+                <div class="response-box" id="res-perfil-put"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMPRESA -->
+      <div class="panel" id="panel-empresa">
+        <div class="section-head">
+          <h2>Empresa</h2>
+          <p>Dados do restaurante, white-label, taxa de entrega e formas de pagamento.</p>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('empresa','dados')">Dados</button>
+          <button class="tab-btn" onclick="switchTab('empresa','criar')">Cadastrar</button>
+          <button class="tab-btn" onclick="switchTab('empresa','wl')">White-label</button>
+          <button class="tab-btn" onclick="switchTab('empresa','taxa')">Taxa de Entrega</button>
+          <button class="tab-btn" onclick="switchTab('empresa','formas')">Formas Pgto</button>
+        </div>
+
+        <!-- GET empresa -->
+        <div class="tab-panel active" id="tp-empresa-dados">
+          <div class="route-card">
+            <div class="route-header">
+              <span class="method GET">GET</span>
+              <span class="route-path">/empresa/</span>
+              <span class="route-desc">Dados da empresa</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <button class="btn-run" onclick="req('GET','/empresa/',null,'res-emp-get')">Enviar</button>
+              </div>
+              <div class="response-box" id="res-emp-get"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- POST empresa -->
+        <div class="tab-panel" id="tp-empresa-criar">
+          <div class="route-card">
+            <div class="route-header">
+              <span class="method POST">POST</span>
+              <span class="route-path">/empresa/</span>
+              <span class="route-desc">Cadastro inicial (onboarding)</span>
+            </div>
+            <div class="route-body">
+              <div class="input-row">
+                <input class="input-sm" id="ec-razao" placeholder="Razão Social *">
+                <input class="input-sm" id="ec-fantasia" placeholder="Nome Fantasia *">
+              </div>
+              <div class="input-row">
+                <input class="input-sm" id="ec-cnpj" placeholder="CNPJ *">
+                <input class="input-sm" id="ec-email" placeholder="E-mail" type="email">
+                <input class="input-sm" id="ec-tel" placeholder="Telefone">
+              </div>
+              <div class="input-row">
+                <input class="input-sm" id="ec-cep" placeholder="CEP">
+                <input class="input-sm" id="ec-logradouro" placeholder="Logradouro">
+                <input class="input-sm" id="ec-numero" placeholder="Nº" style="max-width:70px">
+              </div>
+              <div class="input-row">
+                <input class="input-sm" id="ec-bairro" placeholder="Bairro">
+                <input class="input-sm" id="ec-cidade" placeholder="Cidade">
+                <input class="input-sm" id="ec-estado" placeholder="UF" style="max-width:60px">
+              </div>
+              <div class="input-row">
+                <input class="input-sm" id="ec-taxa" placeholder="Taxa por km (padrão: 1.50)" type="number" step="0.01">
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="criarEmpresa()">Enviar</button>
+              </div>
+              <div class="response-box" id="res-emp-create"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- WHITE-LABEL -->
+        <div class="tab-panel" id="tp-empresa-wl">
+          <div class="route-card">
+            <div class="route-header">
+              <span class="method PUT">PUT</span>
+              <span class="route-path">/empresa/white-label</span>
+              <span class="route-desc">Configurações visuais — time comercial Zentra</span>
+            </div>
+            <div class="route-body">
+              <div style="font-family:var(--font-m);font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:12px;padding:8px 10px;background:rgba(201,169,110,0.08);border-radius:6px;border:1px solid rgba(201,169,110,0.15)">
+                ⚙️ FORMULÁRIO DE ONBOARDING — Preencha os dados de personalização do cliente
+              </div>
+              <div class="input-row">
+                <input class="input-sm" id="wl-nome" placeholder="Nome do sistema (ex: MeuDelivery)">
+                <input class="input-sm" id="wl-dominio" placeholder="Domínio (ex: meudelivery.com.br)">
+              </div>
+              <div class="input-row">
+                <input class="input-sm" id="wl-cor-primaria" placeholder="Cor primária hex (ex: #C41E1E)" style="max-width:200px">
+                <input class="input-sm" id="wl-cor-secundaria" placeholder="Cor secundária hex (ex: #0F0A0A)" style="max-width:220px">
+              </div>
+              <div class="input-row">
+                <input class="input-sm" id="wl-logo" placeholder="URL da logo">
+              </div>
+              <div class="input-row">
+                <input class="input-sm" id="wl-email-suporte" placeholder="E-mail de suporte ao cliente" type="email">
+                <input class="input-sm" id="wl-fone-suporte" placeholder="Fone de suporte">
+              </div>
+              <div class="input-row">
+                <input class="input-sm" id="wl-rodape" placeholder="Texto do rodapé (ex: © 2026 Meu Restaurante)">
+              </div>
+              <div class="input-row">
+                <button class="btn-run" onclick="salvarWhiteLabel()">Salvar White-label</button>
+              </div>
+              <div class="response-box" id="res-wl"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAXA ENTREGA -->
+        <div class="tab-panel" id="tp-empresa-taxa">
+          <div class="route-grid">
+            <div class="route-card">
+              <div class="route-header">
+                <span class="method GET">GET</span>
+                <span class="route-path">/empresa/taxa-entrega</span>
+                <span class="route-desc">Ver taxa + calcular</span>
+              </div>
+              <div class="route-body">
+                <div class="input-row">
+                  <input class="input-sm" id="taxa-dist" placeholder="distancia_km (opcional)" type="number" step="0.1">
+                </div>
+                <div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-family:var(--font-m)">
+                  ℹ️ Abaixo de 1km = gratuito · padrão R$1,50/km
+                </div>
+                <div class="input-row">
+                  <button class="btn-run" onclick="req('GET','/empresa/taxa-entrega'+(v('taxa-dist')?'?distancia_km='+v('taxa-dist'):''),null,'res-taxa-get')">Enviar</button>
+                </div>
+                <div class="response-box" id="res-taxa-get"></div>
+              </div>
+            </div>
+            <div class="route-card">
+              <div class="route-header">
+                <span class="method PUT">PUT</span>
+                <span class="route-path">/empresa/taxa-entrega</span>
+                <span class="route-desc">Atualizar taxa</span>
+              </div>
+              <div class="route-body">
+                <div class="input-row">
+                  <input class="input-sm" id="taxa-nova" placeholder="Nova taxa por km (ex: 2.00)" type="number" step="0.01">
+                </div>
+                <div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-family:var(--font-m)">
+                  Cargos: dono ou gerente
+                </div>
+                <div class="input-row">
+                  <button class="btn-run" onclick="req('PUT','/empresa/taxa-entrega',{taxa_por_km:parseFloat(v('taxa-nova'))},'res-taxa-put')">Enviar</button>
+                </div>
+                <div class="response-box" id="res-taxa-put"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FORMAS DE PAGAMENTO -->
+        <div class="tab-panel" id="tp-empresa-formas">
+          <div class="route-grid">
+            <div class="route-card">
+              <div class="route-header">
+                <span class="method GET">GET</span>
+                <span class="route-path">/empresa/formas-pagamento</span>
+                <span class="route-desc">Listar</span>
+              </div>
+              <div class="route-body">
+                <div class="input-row">
+                  <button class="btn-run" onclick="req('GET','/empresa/formas-pagamento',null,'res-fp-list')">Enviar</button>
+                </div>
+                <div class="response-box" id="res-fp-list"></div>
+              </div>
+            </div>
+            <div class="route-card">
+              <div class="route-header">
+                <span class="method POST">POST</span>
+                <span class="route-path">/empresa/formas-pagamento</span>
+                <span class="route-desc">Criar</span>
+              </div>
+              <div class="route-body">
+                <div class="input-row">
+                  <input class="input-sm" id="fp-nome" placeholder="Nome (ex: Pix, Dinheiro)">
+                </div>
+                <div class="input-row">
+                  <input class="input-sm" id="fp-taxa" placeholder="Taxa operadora %" type="number" step="0.01" style="max-width:160px">
+                  <input class="input-sm" id="fp-dias" placeholder="Dias p/ recebimento" type="number" style="max-width:180px">
+                </div>
+                <div class="input-row">
+                  <button class="btn-run" onclick="criarFormaPagamento()">Enviar</button>
+                </div>
+                <div class="response-box" id="res-fp-create"></div>
+              </div>
+            </div>
+            <div class="route-card">
+              <div class="route-header">
+                <span class="method PUT">PUT</span>
+                <span class="route-path">/empresa/formas-pagamento/:id</span>
+                <span class="route-desc">Editar</span>
+              </div>
+              <div class="route-body">
+                <div class="input-row">
+                  <input class="input-sm" id="fp-edit-id" placeholder="ID" style="max-width:70px">
+                  <input class="input-sm" id="fp-edit-nome" placeholder="Nome">
+                </div>
+                <div class="input-row">
+                  <input class="input-sm" id="fp-edit-taxa" placeholder="Taxa %" type="number" step="0.01">
+                  <input class="input-sm" id="fp-edit-dias" placeholder="Dias" type="number">
+                  <select class="input-sm" id="fp-edit-ativo" style="max-width:120px">
+                    <option value="">Ativo?</option>
+                    <option value="true">Ativo</option>
+                    <option value="false">Inativo</option>
+                  </select>
+                </div>
+                <div class="input-row">
+                  <button class="btn-run" onclick="editarFormaPagamento()">Enviar</button>
+                </div>
+                <div class="response-box" id="res-fp-edit"></div>
+              </div>
+            </div>
+            <div class="route-card">
+              <div class="route-header">
+                <span class="method DELETE">DELETE</span>
+                <span class="route-path">/empresa/formas-pagamento/:id</span>
+                <span class="route-desc">Excluir</span>
+              </div>
+              <div class="route-body">
+                <div class="input-row">
+                  <input class="input-sm" id="fp-del-id" placeholder="ID" style="max-width:80px">
+                </div>
+                <div class="input-row">
+                  <button class="btn-run" onclick="req('DELETE','/empresa/formas-pagamento/'+v('fp-del-id'),null,'res-fp-del')">Enviar</button>
+                </div>
+                <div class="response-box" id="res-fp-del"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+let TOKEN = '';
+let BASE  = 'http://localhost:5000';
+
+// ── HELPERS ──────────────────────────────────────────────
+const v   = id => document.getElementById(id)?.value?.trim() || '';
+const $   = id => document.getElementById(id);
+
+function headers(isJson = true) {
+  const h = {};
+  if (TOKEN) h['Authorization'] = 'Bearer ' + TOKEN;
+  if (isJson) h['Content-Type'] = 'application/json';
+  return h;
+}
+
+function showRes(id, status, data) {
+  const box = $(id);
+  if (!box) return;
+  box.classList.add('show');
+  const ok    = status >= 200 && status < 300;
+  const warn  = status >= 400 && status < 500;
+  const cls   = ok ? 's-ok' : warn ? 's-warn' : 's-err';
+  const label = ok ? '✓ ' + status : '✗ ' + status;
+  box.innerHTML = `
+    <div class="res-header">
+      <span class="status-badge ${cls}">${label}</span>
+      <span style="color:var(--muted);font-size:10px">${new Date().toLocaleTimeString()}</span>
+    </div>
+    <div class="res-body">${JSON.stringify(data, null, 2)}</div>
+  `;
+}
+
+async function req(method, path, body, resId) {
+  const btn = event?.target;
+  if (btn) btn.disabled = true;
+  try {
+    const opts = { method, headers: headers() };
+    if (body !== null && body !== undefined) opts.body = JSON.stringify(body);
+    const r    = await fetch(BASE + path, opts);
+    const data = await r.json().catch(() => ({}));
+    showRes(resId, r.status, data);
+  } catch(e) {
+    showRes(resId, 0, { erro: 'Falha na conexão. Verifique se o Flask está rodando.', detail: e.message });
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// ── LOGIN ─────────────────────────────────────────────────
+async function doLogin() {
+  BASE = $('base-url').value.replace(/\/$/, '');
+  const email = $('login-email').value;
+  const senha = $('login-pass').value;
+  try {
+    const r    = await fetch(BASE + '/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, senha })
+    });
+    const data = await r.json();
+    if (data.token) {
+      TOKEN = data.token;
+      $('login-screen').style.display = 'none';
+      $('app').style.display = 'flex';
+      $('sb-name').textContent  = data.usuario?.nome || email;
+      $('sb-cargo').textContent = (data.usuario?.cargo || '').toUpperCase();
+      $('url-display').textContent = BASE.replace('http://','').replace('https://','');
+      $('token-indicator').className = 'token-status ts-ok';
+      $('token-indicator').innerHTML = '<span class="ts-dot"></span> Token ativo';
+    } else {
+      alert('Erro: ' + (data.erro || 'Credenciais inválidas'));
+    }
+  } catch(e) {
+    alert('Não foi possível conectar à API. Verifique a URL e se o Flask está rodando.\n\n' + e.message);
+  }
+}
+
+function doLogout() {
+  TOKEN = '';
+  $('login-screen').style.display = 'flex';
+  $('app').style.display = 'none';
+}
+
+// Login com Enter
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && $('login-screen').style.display !== 'none') doLogin();
+});
+
+// ── AUTH ──────────────────────────────────────────────────
+async function runLogin() {
+  const email = $('a-email').value;
+  const senha = $('a-pass').value;
+  await req('POST', '/auth/login', { email, senha }, 'res-login');
+  // se retornou token, atualiza
+  const box = $('res-login');
+  const txt = box?.querySelector('.res-body')?.textContent;
+  if (txt) {
+    try {
+      const d = JSON.parse(txt);
+      if (d.token) {
+        TOKEN = d.token;
+        $('token-indicator').className = 'token-status ts-ok';
+        $('token-indicator').innerHTML = '<span class="ts-dot"></span> Token atualizado';
+      }
+    } catch {}
+  }
+}
+
+// ── PRODUTO ───────────────────────────────────────────────
+async function criarProduto() {
+  const fd = new FormData();
+  fd.append('nome', v('pn-nome'));
+  fd.append('preco', v('pn-preco'));
+  if (v('pn-desc')) fd.append('descricao', v('pn-desc'));
+  if (v('pn-cat'))  fd.append('categoria_id', v('pn-cat'));
+  fd.append('disponivel', v('pn-disp'));
+  const file = $('pn-img').files[0];
+  if (file) fd.append('imagem', file);
+
+  const btn = event?.target;
+  if (btn) btn.disabled = true;
+  try {
+    const r    = await fetch(BASE + '/produtos/', {
+      method: 'POST',
+      headers: TOKEN ? { 'Authorization': 'Bearer ' + TOKEN } : {},
+      body: fd
+    });
+    const data = await r.json();
+    showRes('res-prod-create', r.status, data);
+  } catch(e) {
+    showRes('res-prod-create', 0, { erro: e.message });
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function editarProduto() {
+  const id = v('pe-id');
+  const fd = new FormData();
+  if (v('pe-nome'))  fd.append('nome', v('pe-nome'));
+  if (v('pe-preco')) fd.append('preco', v('pe-preco'));
+  if (v('pe-desc'))  fd.append('descricao', v('pe-desc'));
+  if (v('pe-disp'))  fd.append('disponivel', v('pe-disp'));
+
+  const btn = event?.target;
+  if (btn) btn.disabled = true;
+  try {
+    const r    = await fetch(BASE + '/produtos/' + id, {
+      method: 'PUT',
+      headers: TOKEN ? { 'Authorization': 'Bearer ' + TOKEN } : {},
+      body: fd
+    });
+    const data = await r.json();
+    showRes('res-prod-edit', r.status, data);
+  } catch(e) {
+    showRes('res-prod-edit', 0, { erro: e.message });
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// ── ENDEREÇO ──────────────────────────────────────────────
+function criarEndereco() {
+  const body = {
+    apelido:     v('en-apelido'),
+    cep:         v('en-cep'),
+    logradouro:  v('en-logradouro'),
+    numero:      v('en-numero'),
+    bairro:      v('en-bairro'),
+    cidade:      v('en-cidade'),
+    estado:      v('en-estado'),
+    complemento: v('en-complemento'),
+    referencia:  v('en-referencia'),
+  };
+  req('POST', '/enderecos/', body, 'res-end-create');
+}
+
+// ── PEDIDO ────────────────────────────────────────────────
+function criarPedido() {
+  let itens = [];
+  try { itens = JSON.parse($('ped-itens').value || '[]'); } catch { alert('JSON dos itens inválido.'); return; }
+  const body = {
+    endereco_id:     parseInt(v('ped-end-id')),
+    forma_pagamento: v('ped-pagamento'),
+    observacoes:     v('ped-obs'),
+    itens
+  };
+  req('POST', '/pedidos/', body, 'res-ped-create');
+}
+
+function finalizarEntrega() {
+  const entregue = v('ped-ent-val') === 'true';
+  const body = { entregue };
+  if (!entregue) body.motivo = v('ped-ent-motivo') || 'Sem motivo informado';
+  req('PATCH', '/pedidos/' + v('ped-ent-id') + '/entrega', body, 'res-ped-ent');
+}
+
+// ── USUÁRIO ───────────────────────────────────────────────
+function criarUsuario() {
+  req('POST', '/usuarios/', {
+    nome:     v('uc-nome'),
+    email:    v('uc-email'),
+    senha:    v('uc-senha'),
+    cpf:      v('uc-cpf'),
+    cargo:    v('uc-cargo'),
+    telefone: v('uc-tel'),
+  }, 'res-usr-create');
+}
+
+function editarUsuario() {
+  const body = {};
+  if (v('ue-nome'))  body.nome     = v('ue-nome');
+  if (v('ue-tel'))   body.telefone = v('ue-tel');
+  if (v('ue-cargo')) body.cargo    = v('ue-cargo');
+  if (v('ue-senha')) body.senha    = v('ue-senha');
+  req('PUT', '/usuarios/' + v('ue-id'), body, 'res-usr-edit');
+}
+
+function editarPerfil() {
+  const body = {};
+  if (v('up-nome'))  body.nome     = v('up-nome');
+  if (v('up-tel'))   body.telefone = v('up-tel');
+  if (v('up-senha')) body.senha    = v('up-senha');
+  req('PUT', '/usuarios/perfil', body, 'res-perfil-put');
+}
+
+// ── NAVIGATION ────────────────────────────────────────────
+const panelTitles = {
+  overview: 'Overview', auth: 'Autenticação',
+  categorias: 'Categorias', produtos: 'Produtos',
+  enderecos: 'Endereços', pedidos: 'Pedidos',
+  usuarios: 'Usuários', empresa: 'Empresa & White-label'
+};
+
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  $('panel-' + name)?.classList.add('active');
+  $('page-title').textContent = panelTitles[name] || name;
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    if (b.getAttribute('onclick')?.includes("'"+name+"'")) b.classList.add('active');
+  });
+}
+
+function switchTab(panel, tab) {
+  const container = $('panel-' + panel);
+  if (!container) return;
+  container.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  $('tp-' + panel + '-' + tab)?.classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ── EMPRESA ───────────────────────────────────────────────
+function criarEmpresa() {
+  const body = {
+    razao_social:  v('ec-razao'),
+    nome_fantasia: v('ec-fantasia'),
+    cnpj:          v('ec-cnpj'),
+    email:         v('ec-email'),
+    telefone:      v('ec-tel'),
+    cep:           v('ec-cep'),
+    logradouro:    v('ec-logradouro'),
+    numero:        v('ec-numero'),
+    bairro:        v('ec-bairro'),
+    cidade:        v('ec-cidade'),
+    estado:        v('ec-estado'),
+  };
+  if (v('ec-taxa')) body.taxa_por_km = parseFloat(v('ec-taxa'));
+  req('POST', '/empresa/', body, 'res-emp-create');
+}
+
+function salvarWhiteLabel() {
+  const body = {};
+  if (v('wl-nome'))          body.wl_nome_sistema   = v('wl-nome');
+  if (v('wl-dominio'))       body.wl_dominio        = v('wl-dominio');
+  if (v('wl-cor-primaria'))  body.wl_cor_primaria   = v('wl-cor-primaria');
+  if (v('wl-cor-secundaria'))body.wl_cor_secundaria = v('wl-cor-secundaria');
+  if (v('wl-logo'))          body.wl_logo_url       = v('wl-logo');
+  if (v('wl-email-suporte')) body.wl_suporte_email  = v('wl-email-suporte');
+  if (v('wl-fone-suporte'))  body.wl_suporte_fone   = v('wl-fone-suporte');
+  if (v('wl-rodape'))        body.wl_rodape_texto   = v('wl-rodape');
+  req('PUT', '/empresa/white-label', body, 'res-wl');
+}
+
+function criarFormaPagamento() {
+  const body = { nome: v('fp-nome') };
+  if (v('fp-taxa')) body.taxa_operadora_percentual = parseFloat(v('fp-taxa'));
+  if (v('fp-dias')) body.dias_para_recebimento     = parseInt(v('fp-dias'));
+  req('POST', '/empresa/formas-pagamento', body, 'res-fp-create');
+}
+
+function editarFormaPagamento() {
+  const body = {};
+  if (v('fp-edit-nome')) body.nome                      = v('fp-edit-nome');
+  if (v('fp-edit-taxa')) body.taxa_operadora_percentual = parseFloat(v('fp-edit-taxa'));
+  if (v('fp-edit-dias')) body.dias_para_recebimento     = parseInt(v('fp-edit-dias'));
+  if (v('fp-edit-ativo') !== '') body.ativo = v('fp-edit-ativo') === 'true';
+  req('PUT', '/empresa/formas-pagamento/' + v('fp-edit-id'), body, 'res-fp-edit');
+}
+</script>
+</body>
+</html>

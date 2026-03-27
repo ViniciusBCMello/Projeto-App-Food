@@ -26,4 +26,11 @@ yarn-error.log*
 __pycache__/
 *.pyc
 instance/
+<<<<<<< HEAD
 uploads/
+=======
+.env
+uploads/
+zentra.html
+zentraEMP.html
+>>>>>>> 9c68475 (Novas funcionalidades)
