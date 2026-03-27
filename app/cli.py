@@ -1,3 +1,5 @@
+import os
+
 import click
 import secrets
 from datetime import date, timedelta
@@ -76,7 +78,9 @@ def setup_seed():
         click.echo("ℹ️  Usuário dono já existe.")
         return
 
-    cpf = click.prompt("CPF do administrador")
+    cpf = os.environ.get("ADMIN_CPF")
+    if not cpf:
+        cpf = click.prompt("CPF do administrador")   
 
     dono = User(
         nome="Administrador",
