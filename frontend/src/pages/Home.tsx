@@ -1,4 +1,12 @@
+import { useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
+
 function Home() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    navigate('/produtos');
+  })
   const maisPedidos = [
     { id: 1, name: "X-Burguer", price: 29.9, image: "https://picsum.photos/200/150?random=11" },
     { id: 2, name: "Pizza Calabresa", price: 44.9, image: "https://picsum.photos/200/150?random=12" },

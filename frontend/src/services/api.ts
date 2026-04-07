@@ -3,7 +3,6 @@ import { auth } from './auth';
 
 const baseURL =
   import.meta.env.VITE_BACKEND ||
-  import.meta.env.BACKEND ||
   'http://localhost:5000';
 
 export const api = axios.create({

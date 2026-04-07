@@ -1,105 +1,35 @@
-import { useState } from "react";
+import Container from 'react-bootstrap/Container';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
+import NavDropdown from 'react-bootstrap/NavDropdown';
 
-interface NavItem {
-  label: string;
-  href: string;
-}
-
-interface HeaderProps {
-  logoText?: string;
-  navItems?: NavItem[];
-  ctaLabel?: string;
-  onCtaClick?: () => void;
-}
-
-export default function Header({
-  logoText = "MyApp",
-  navItems = [
-    { label: "Home", href: "#" },
-    { label: "Sobre", href: "#" },
-    { label: "Serviços", href: "#" },
-    { label: "Contato", href: "#" },
-  ],
-  ctaLabel = "Entrar",
-  onCtaClick,
-}: HeaderProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
+function Header() {
   return (
-    <header className="w-full bg-white shadow-sm">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-
-        {/* Logo */}
-        <h1 className="text-xl font-bold text-gray-800">
-          {logoText}
-        </h1>
-
-        {/* Desktop Menu */}
-        <nav className="hidden md:flex items-center gap-8">
-          {navItems.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              className="text-gray-600 hover:text-black transition-colors"
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
-
-        {/* Desktop CTA */}
-        <div className="hidden md:block">
-          <button
-            onClick={onCtaClick}
-            className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition"
-          >
-            {ctaLabel}
-          </button>
-        </div>
-
-        {/* Mobile Button */}
-        <button
-          className="md:hidden flex flex-col gap-1"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <span
-            className={`block h-0.5 w-6 bg-black transition-all ${isOpen ? "rotate-45 translate-y-1.5" : ""
-              }`}
-          />
-          <span
-            className={`block h-0.5 w-6 bg-black transition-all ${isOpen ? "opacity-0" : ""
-              }`}
-          />
-          <span
-            className={`block h-0.5 w-6 bg-black transition-all ${isOpen ? "-rotate-45 -translate-y-1.5" : ""
-              }`}
-          />
-        </button>
-      </div>
-
-      {/* Mobile Menu */}
-      {isOpen && (
-        <div className="md:hidden px-6 pb-4">
-          <nav className="flex flex-col gap-4">
-            {navItems.map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className="text-gray-600 hover:text-black transition-colors"
-              >
-                {item.label}
-              </a>
-            ))}
-
-            <button
-              onClick={onCtaClick}
-              className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition"
-            >
-              {ctaLabel}
-            </button>
-          </nav>
-        </div>
-      )}
-    </header>
+    <Navbar expand="lg" className="bg-body-tertiary">
+      <Container>
+        <Navbar.Brand href="#home">React-Bootstrap</Navbar.Brand>
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Collapse id="basic-navbar-nav">
+          <Nav className="me-auto">
+            <Nav.Link href="#home">Home</Nav.Link>
+            <Nav.Link href="#link">Link</Nav.Link>
+            <NavDropdown title="Dropdown" id="basic-nav-dropdown">
+              <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
+              <NavDropdown.Item href="#action/3.2">
+                Another action
+              </NavDropdown.Item>
+              <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
+              <NavDropdown.Divider />
+              <NavDropdown.Item href="#action/3.4">
+                Separated link
+              </NavDropdown.Item>
+            </NavDropdown>
+          </Nav>
+        </Navbar.Collapse>
+        {/* por um botao de busca nesssa porra */}
+      </Container>
+    </Navbar>
   );
 }
+
+export default Header;

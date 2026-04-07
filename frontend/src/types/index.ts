@@ -1,3 +1,4 @@
+// --- Usuário e Autenticação ---
 export type Role = 'cliente' | 'atendente' | 'gerente' | 'dono';
 
 export interface User {
@@ -12,6 +13,12 @@ export interface AuthResponse {
   usuario: User;
 }
 
+export interface LoginCredentials {
+  email: string;
+  senha: string;
+}
+
+// --- Produtos e Categorias ---
 export interface Category {
   id: number;
   nome: string;
@@ -28,10 +35,11 @@ export interface Product {
   imagem_url: string;
 }
 
+// --- Endereços ---
 export interface Address {
-  id: number;
-  apelido: string;
-  cep: string;
+  id?: number;
+  apelido?: string;
+  cep?: string;
   logradouro: string;
   numero: string;
   complemento?: string;
@@ -39,15 +47,15 @@ export interface Address {
   cidade: string;
   estado: string;
   referencia?: string;
-  principal: boolean;
+  principal?: boolean;
 }
 
+// --- Pedidos (Orders) ---
 export type OrderStatus =
   | 'aguardando'
-  | 'em_preparo'
-  | 'pronto'
-  | 'saiu_entrega'
-  | 'cheguei'
+  | 'preparando'
+  | 'saiu_para_entrega'
+  | 'entregue'
   | 'cancelado';
 
 export interface OrderItem {
@@ -66,12 +74,14 @@ export interface Order {
   total: number;
   forma_pagamento: string;
   itens: OrderItem[];
-  endereco: Partial<Address>;
-  cliente: { id: number; nome: string; telefone: string };
+  endereco: Address;
+  cliente: {
+    id: number;
+    nome: string;
+    telefone: string | null;
+  };
+  observacoes: string;
+  motivo_nao_entrega: string | null;
+  entregue: string | null;
   criado_em: string;
-}
-
-export interface LoginCredentials {
-  email: string;
-  senha: string;
 }

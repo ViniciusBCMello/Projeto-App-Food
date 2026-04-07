@@ -47,7 +47,6 @@ export const useUpdateOrderStatus = () => {
     },
     onSuccess: (updatedOrder) => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
-      // Atualiza também o cache do pedido individual se você tiver um useOrder(id)
       queryClient.invalidateQueries({ queryKey: ['orders', updatedOrder.id] });
     },
   });

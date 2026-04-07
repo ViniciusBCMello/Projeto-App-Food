@@ -1,18 +1,17 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Product } from '../types'; // Importação tipo-only
 
-export interface CartItem extends Product {
+export interface CartItem {
+  id: number;
   quantity: number;
 }
 
 interface CartState {
   items: CartItem[];
-  addItem: (product: Product) => void;
-  removeItem: (productId: number) => void;
-  updateQuantity: (productId: number, quantity: number) => void;
+  addItem: (id: number) => void;
+  removeItem: (id: number) => void;
+  updateQuantity: (id: number, quantity: number) => void;
   clearCart: () => void;
-  getTotal: () => number;
 }
 
 export const useCartStore = create<CartState>()(
@@ -20,18 +19,18 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
 
-      addItem: (product) => {
+      addItem: (id) => {
         const { items } = get();
-        const existing = items.find((i) => i.id === product.id);
+        const existing = items.find((i) => i.id === id);
 
         if (existing) {
           set({
             items: items.map((i) =>
-              i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i,
+              i.id === id ? { ...i, quantity: i.quantity + 1 } : i,
             ),
           });
         } else {
-          set({ items: [...items, { ...product, quantity: 1 }] });
+          set({ items: [...items, { id, quantity: 1 }] });
         }
       },
 
@@ -48,12 +47,9 @@ export const useCartStore = create<CartState>()(
         }),
 
       clearCart: () => set({ items: [] }),
-
-      getTotal: () =>
-        get().items.reduce((acc, item) => acc + item.preco * item.quantity, 0),
     }),
     {
-      name: 'mesa-verde-cart', // Nome da chave no localStorage
+      name: 'mesa-verde-cart',
     },
   ),
 );
