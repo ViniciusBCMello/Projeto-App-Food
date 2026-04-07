@@ -48,7 +48,11 @@ export default function AddressSelector({ selectedAddressId, onChange }: Address
   const handleOpenForm = (address?: Address) => {
     if (address) {
       setEditingAddress(address);
-      setFormData({ ...address });
+      setFormData({
+        ...address,
+        complemento: address.complemento || '',
+        referencia: address.referencia || '',
+      });
     } else {
       setEditingAddress(null);
       setFormData({

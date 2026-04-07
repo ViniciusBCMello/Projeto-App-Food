@@ -3,7 +3,16 @@ import { Card, Row, Col, Badge, Button } from 'react-bootstrap';
 
 import Placeholder from "../assets/hamburg.png";
 
-function ProductCard({ id, name, price, available, image, description }) {
+interface ProductCardProps {
+  id: number;
+  name: string;
+  price: number;
+  available: boolean;
+  image: string;
+  description: string;
+}
+
+function ProductCard({ id, name, price, available, image, description }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeItem = useCartStore((state) => state.removeItem);

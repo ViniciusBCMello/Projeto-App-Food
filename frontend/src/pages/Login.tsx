@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
@@ -14,7 +14,7 @@ function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     mutate({
@@ -31,7 +31,7 @@ function Login() {
 
       {error && (
         <Alert variant="danger">
-          {error.response?.data?.erro || 'Login failed'}
+          {(error.response?.data as any)?.erro || 'Login failed'}
         </Alert>
       )}
 

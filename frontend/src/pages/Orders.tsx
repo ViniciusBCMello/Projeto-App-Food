@@ -8,6 +8,7 @@ export default function Orders() {
   const navigate = useNavigate();
   const { useGetOrders, cancelOrder } = useOrder();
 
+  // @ts-ignore
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
   const { data: orders, isLoading, isError } = useGetOrders(statusFilter);
 

@@ -16,8 +16,7 @@ function Cart() {
   const { data: productsData, isLoading } = useProducts();
   const { createOrder, isCreating } = useOrder();
 
-  const [formaPagamento, setFormaPagamento] = useState('pix');
-  const [observacoes, setObservacoes] = useState('');
+  const [formaPagamento, setFormaPagamento] = useState<"pix" | "dinheiro" | "cartao">("pix");  const [observacoes, setObservacoes] = useState('');
 
   const [enderecoId, setEnderecoId] = useState<number | null>(null);
 
@@ -144,7 +143,7 @@ function Cart() {
               <Form.Label className="small fw-bold text-muted">Forma de Pagamento</Form.Label>
               <Form.Select
                 value={formaPagamento}
-                onChange={(e) => setFormaPagamento(e.target.value)}
+                onChange={(e) => setFormaPagamento(e.target.value as "pix" | "dinheiro" | "cartao")}
                 className="bg-light border-0 shadow-none"
               >
                 <option value="pix">PIX</option>
