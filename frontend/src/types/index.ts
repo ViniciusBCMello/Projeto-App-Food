@@ -1,11 +1,32 @@
-// --- Usuário e Autenticação ---
-export type Role = 'cliente' | 'atendente' | 'gerente' | 'dono';
+// --- 1. Auth & Users ---
+
+export type UserRole =
+  | 'dono'
+  | 'administracao'
+  | 'gerente'
+  | 'atendente'
+  | 'motoboy'
+  | 'cliente';
 
 export interface User {
   id: number;
   nome: string;
   email: string;
-  cargo: Role;
+  cargo: UserRole; // Mantido o nome da chave da API, mas tipo em inglês
+  telefone?: string;
+  cpf?: string;
+  ativo?: boolean;
+  criado_em?: string;
+  motoboy?: {
+    cnh: string;
+    placa_veiculo: string;
+    modelo_veiculo: string;
+  };
+}
+
+export interface LoginCredentials {
+  email: string;
+  senha: string; // Senha é o campo esperado pelo seu backend
 }
 
 export interface AuthResponse {
@@ -13,12 +34,13 @@ export interface AuthResponse {
   usuario: User;
 }
 
-export interface LoginCredentials {
-  email: string;
-  senha: string;
+export interface ApiError {
+  erro?: string;
+  mensagem?: string;
 }
 
-// --- Produtos e Categorias ---
+// --- 2. Products & Categories ---
+
 export interface Category {
   id: number;
   nome: string;
@@ -35,7 +57,8 @@ export interface Product {
   imagem_url: string;
 }
 
-// --- Endereços ---
+// --- 3. Addresses ---
+
 export interface Address {
   id?: number;
   apelido?: string;
@@ -50,7 +73,8 @@ export interface Address {
   principal?: boolean;
 }
 
-// --- Pedidos (Orders) ---
+// --- 4. Orders ---
+
 export type OrderStatus =
   | 'aguardando'
   | 'preparando'
