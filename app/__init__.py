@@ -79,6 +79,9 @@ def create_app():
 
     from app.financeiro import bp as financeiro_bp
     app.register_blueprint(financeiro_bp, url_prefix="/financeiro")
+    
+    from app.relatorios import bp as relatorios_bp
+    app.register_blueprint(relatorios_bp, url_prefix="/relatorios")
 
     # cli
     from app.cli import registrar_comandos

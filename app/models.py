@@ -86,6 +86,24 @@ class Produto(db.Model):
     def __repr__(self):
         return f"<Produto {self.nome}>"
     
+class ProdutoCusto(db.Model):
+    """
+    Histórico de custos de cada produto.
+    Cada vez que o custo muda, cria-se um novo registro com nova vigência.
+    O custo vigente é sempre o de maior data_vigencia <= hoje.
+    """
+    __tablename__ = "produto_custos"
+ 
+    id             = db.Column(db.Integer, primary_key=True)
+    produto_id     = db.Column(db.Integer, db.ForeignKey("produtos.id"), nullable=False)
+    custo_unitario = db.Column(db.Numeric(10, 2), nullable=False)
+    data_vigencia  = db.Column(db.Date, nullable=False)   # a partir de quando vale
+    observacao     = db.Column(db.String(255))            # ex: "Reajuste fornecedor Ago/26"
+    criado_em      = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+ 
+    produto = db.relationship("Produto", backref=db.backref("custos", lazy=True, order_by="ProdutoCusto.data_vigencia.desc()"))
+ 
+    
 
 class Pedido(db.Model):
     __tablename__ = "pedidos"
