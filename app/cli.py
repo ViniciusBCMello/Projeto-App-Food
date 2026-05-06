@@ -97,3 +97,11 @@ def setup_seed():
     click.echo("   Email: admin@sistema.com")
     click.echo("   Senha: admin1234")
     click.echo("⚠️  Troque a senha após o primeiro login!\n")
+
+# ─── flask setup faker ───────────────────────────────
+@setup.command("faker")
+@with_appcontext
+def setup_faker():
+    """Popula o banco com dados falsos para testes."""
+    from app.seeds.faker_seed import popular_banco
+    popular_banco()

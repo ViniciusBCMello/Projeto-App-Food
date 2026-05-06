@@ -1,10 +1,11 @@
 from flask import request, jsonify, send_from_directory, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.produtos import bp
-from app.models import Produto, Categoria
+from app.models import Produto, Categoria, ProdutoCusto
 from app import db
 import os
 import uuid
+from datetime import date
 
 
 EXTENSOES_PERMITIDAS = {"png", "jpg", "jpeg", "webp"}
@@ -258,3 +259,114 @@ def excluir(id):
     db.session.commit()
 
     return jsonify({"mensagem": "Produto excluído."}), 200
+
+
+# ─── Custos de produto ─────────────────────────────────────
+
+@bp.route("/<int:id>/custos", methods=["GET"])
+@jwt_required()
+def listar_custos(id):
+    produto = db.session.get(Produto, id)
+    if not produto:
+        return jsonify({"erro": "Produto não encontrado."}), 404
+
+    custos = (
+        ProdutoCusto.query
+        .filter_by(produto_id=id)
+        .order_by(ProdutoCusto.data_vigencia.desc())
+        .all()
+    )
+    return jsonify([{
+        "id":             c.id,
+        "produto_id":     c.produto_id,
+        "custo_unitario": float(c.custo_unitario),
+        "data_vigencia":  c.data_vigencia.isoformat(),
+        "observacao":     c.observacao,
+        "criado_em":      c.criado_em.isoformat() if c.criado_em else None,
+    } for c in custos]), 200
+
+
+@bp.route("/<int:id>/custos/vigente", methods=["GET"])
+@jwt_required()
+def custo_vigente(id):
+    produto = db.session.get(Produto, id)
+    if not produto:
+        return jsonify({"erro": "Produto não encontrado."}), 404
+
+    custo = (
+        ProdutoCusto.query
+        .filter(
+            ProdutoCusto.produto_id == id,
+            ProdutoCusto.data_vigencia <= date.today()
+        )
+        .order_by(ProdutoCusto.data_vigencia.desc())
+        .first()
+    )
+
+    if not custo:
+        return jsonify({"erro": "Nenhum custo cadastrado para este produto."}), 404
+
+    return jsonify({
+        "id":             custo.id,
+        "produto_id":     custo.produto_id,
+        "custo_unitario": float(custo.custo_unitario),
+        "data_vigencia":  custo.data_vigencia.isoformat(),
+        "observacao":     custo.observacao,
+    }), 200
+
+
+@bp.route("/<int:id>/custos", methods=["POST"])
+@jwt_required()
+def criar_custo(id):
+    erro = requer_cargo("dono", "gerente", "administracao")
+    if erro:
+        return erro
+
+    produto = db.session.get(Produto, id)
+    if not produto:
+        return jsonify({"erro": "Produto não encontrado."}), 404
+
+    data = request.get_json()
+    custo_unitario = data.get("custo_unitario")
+    data_vigencia  = data.get("data_vigencia")
+
+    if not custo_unitario:
+        return jsonify({"erro": "custo_unitario é obrigatório."}), 400
+
+    try:
+        data_vigencia = date.fromisoformat(data_vigencia) if data_vigencia else date.today()
+    except ValueError:
+        return jsonify({"erro": "data_vigencia inválida. Use YYYY-MM-DD."}), 400
+
+    custo = ProdutoCusto(
+        produto_id     = id,
+        custo_unitario = custo_unitario,
+        data_vigencia  = data_vigencia,
+        observacao     = data.get("observacao", "").strip(),
+    )
+    db.session.add(custo)
+    db.session.commit()
+
+    return jsonify({
+        "id":             custo.id,
+        "produto_id":     custo.produto_id,
+        "custo_unitario": float(custo.custo_unitario),
+        "data_vigencia":  custo.data_vigencia.isoformat(),
+        "observacao":     custo.observacao,
+    }), 201
+
+
+@bp.route("/<int:id>/custos/<int:custo_id>", methods=["DELETE"])
+@jwt_required()
+def excluir_custo(id, custo_id):
+    erro = requer_cargo("dono", "administracao")
+    if erro:
+        return erro
+
+    custo = db.session.get(ProdutoCusto, custo_id)
+    if not custo or custo.produto_id != id:
+        return jsonify({"erro": "Custo não encontrado."}), 404
+
+    db.session.delete(custo)
+    db.session.commit()
+    return jsonify({"mensagem": "Custo excluído."}), 200
