@@ -114,8 +114,18 @@ class Pedido(db.Model):
     total = db.Column(db.Numeric(10, 2), default=0)
     forma_pagamento = db.Column(db.String(30))
     observacoes = db.Column(db.String(255), nullable=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     criado_em = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    # ─── Origem do pedido (interno x marketplaces) ─────────────
+    origem = db.Column(db.String(20), nullable=False, default="interno")
+    # origem: interno | ifood
+    ifood_order_id = db.Column(db.String(64), nullable=True, unique=True)
+    ifood_display_id = db.Column(db.String(20), nullable=True)
+
+    # ─── 99Food ─────────────────────────────────
+    food99_order_id = db.Column(db.String(64), nullable=True, unique=True)
+    food99_display_id = db.Column(db.String(20), nullable=True)
 
     status = db.Column(db.String(30), default="aguardando")
     # aguardando | em_preparo | pronto | saiu_entrega | cheguei
@@ -148,11 +158,19 @@ class ItemPedido(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     pedido_id = db.Column(db.Integer, db.ForeignKey("pedidos.id"), nullable=False)
-    produto_id = db.Column(db.Integer, db.ForeignKey("produtos.id"), nullable=False)
+    produto_id = db.Column(db.Integer, db.ForeignKey("produtos.id"), nullable=True)
     quantidade = db.Column(db.Integer, nullable=False, default=1)
     preco_unitario = db.Column(db.Numeric(10, 2), nullable=False)
 
+    # Usado quando o item vem de um marketplace e ainda não tem
+    # correspondência com um Produto do catálogo interno.
+    nome_externo = db.Column(db.String(200), nullable=True)
+
     produto = db.relationship("Produto")
+
+    @property
+    def nome(self):
+        return self.produto.nome if self.produto else (self.nome_externo or "Item sem descrição")
 
     @property
     def subtotal(self):
@@ -276,3 +294,137 @@ class TransacaoFinanceira(db.Model):
     favorecido_id      = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     criado_em          = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     favorecido         = db.relationship("User", foreign_keys=[favorecido_id])
+
+
+class IfoodCredencial(db.Model):
+    """
+    Credenciais e token de acesso da integração com o iFood (Merchant API).
+    Uma instalação (empresa) tem uma única loja/merchant conectada.
+    """
+    __tablename__ = "ifood_credenciais"
+
+    id               = db.Column(db.Integer, primary_key=True)
+    client_id        = db.Column(db.String(120), nullable=False)
+    client_secret    = db.Column(db.String(255), nullable=False)
+    merchant_id      = db.Column(db.String(64), nullable=False)
+
+    access_token     = db.Column(db.Text, nullable=True)
+    token_expira_em  = db.Column(db.DateTime, nullable=True)
+
+    ativa            = db.Column(db.Boolean, default=True)
+    ultimo_polling_em = db.Column(db.DateTime, nullable=True)
+    criado_em        = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    atualizado_em    = db.Column(
+        db.DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
+
+    @property
+    def token_valido(self):
+        if not self.access_token or not self.token_expira_em:
+            return False
+        expira = self.token_expira_em
+        if expira.tzinfo is None:
+            # SQLite não preserva timezone: o valor volta "naive" do banco
+            # depois de um commit, mesmo tendo sido salvo como UTC-aware.
+            expira = expira.replace(tzinfo=timezone.utc)
+        return datetime.now(timezone.utc) < expira
+
+    def __repr__(self):
+        return f"<IfoodCredencial merchant={self.merchant_id}>"
+
+
+class IfoodEventoProcessado(db.Model):
+    """
+    Registro de deduplicação: cada evento do iFood (webhook ou polling) só
+    deve gerar efeito uma vez no sistema, mesmo se for entregue mais de uma vez.
+    """
+    __tablename__ = "ifood_eventos_processados"
+
+    id           = db.Column(db.Integer, primary_key=True)
+    evento_id    = db.Column(db.String(64), nullable=False, unique=True)
+    tipo         = db.Column(db.String(50), nullable=True)
+    order_id     = db.Column(db.String(64), nullable=True)
+    processado_em = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+class Food99Credencial(db.Model):
+    """
+    Credenciais e token de acesso da integração com o 99Food.
+
+    ⚠️ Modelo de autenticação real da DiDi/99Food (confirmado via swagger.yaml
+    oficial, NÃO é o padrão Open Delivery que havíamos assumido antes):
+    - app_id + app_secret: credenciais do APLICATIVO, cadastradas no portal
+      developer-food.99app.com.
+    - app_shop_id: identificador da LOJA escolhido por nós (livre, é o "seu"
+      identificador da loja no seu sistema).
+    - Antes de qualquer chamada funcionar, a loja precisa AUTORIZAR o app:
+      o dono acessa a URL retornada por /v1/auth/authorizationpage/getUrl e
+      confirma manualmente o vínculo. Só depois disso o auth_token pode ser
+      obtido via /v1/auth/authtoken/get.
+    - auth_token é passado em toda chamada (query param em GET, campo no
+      body em POST) — NÃO é um header "Authorization: Bearer ..." como no
+      iFood.
+    """
+    __tablename__ = "food99_credenciais"
+
+    id               = db.Column(db.Integer, primary_key=True)
+    app_id           = db.Column(db.String(50), nullable=False)
+    app_secret       = db.Column(db.String(255), nullable=False)
+    app_shop_id      = db.Column(db.String(255), nullable=False)
+    base_url         = db.Column(db.String(255), nullable=False,
+                                  default="https://openapi.didi-food.com")
+
+    auth_token       = db.Column(db.Text, nullable=True)
+    token_expira_em  = db.Column(db.DateTime, nullable=True)
+    autorizada       = db.Column(db.Boolean, default=False)
+
+    ativa            = db.Column(db.Boolean, default=True)
+    criado_em        = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    atualizado_em    = db.Column(
+        db.DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
+
+    @property
+    def token_valido(self):
+        if not self.auth_token or not self.token_expira_em:
+            return False
+        expira = self.token_expira_em
+        if expira.tzinfo is None:
+            expira = expira.replace(tzinfo=timezone.utc)
+        return datetime.now(timezone.utc) < expira
+
+
+
+class Food99EventoProcessado(db.Model):
+    """
+    Deduplicação de eventos/notificações do 99Food.
+    """
+    __tablename__ = "food99_eventos_processados"
+
+    id            = db.Column(db.Integer, primary_key=True)
+    evento_id     = db.Column(db.String(64), nullable=False, unique=True)
+    tipo          = db.Column(db.String(50), nullable=True)
+    order_id      = db.Column(db.String(64), nullable=True)
+    processado_em = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+class Food99WebhookLog(db.Model):
+    """
+    Log bruto de tudo que chegar em POST /99food/webhook.
+
+    ⚠️ Temporário/diagnóstico: ainda não sabemos o formato real do payload
+    que o 99Food envia (não documentado no swagger.yaml). Este model guarda
+    o corpo cru de cada chamada para inspecionarmos assim que o primeiro
+    webhook real chegar, e então adaptarmos app/food99/service.py para
+    processar automaticamente em vez de só logar.
+    """
+    __tablename__ = "food99_webhook_logs"
+
+    id          = db.Column(db.Integer, primary_key=True)
+    headers     = db.Column(db.Text, nullable=True)
+    corpo_bruto = db.Column(db.Text, nullable=True)
+    recebido_em = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))    
