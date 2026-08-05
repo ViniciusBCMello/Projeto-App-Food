@@ -28,6 +28,11 @@ def serializar_pedido(pedido):
         "observacoes":         pedido.observacoes,
         "entregue":            pedido.entregue,
         "motivo_nao_entrega":  pedido.motivo_nao_entrega,
+        "origem":              pedido.origem,
+        "ifood_order_id":      pedido.ifood_order_id,
+        "ifood_display_id":    pedido.ifood_display_id,
+        "food99_order_id":     pedido.food99_order_id,
+        "food99_display_id":   pedido.food99_display_id,
         "endereco": {
             "logradouro":  pedido.endereco_logradouro,
             "numero":      pedido.endereco_numero,
@@ -46,7 +51,7 @@ def serializar_pedido(pedido):
             {
                 "id":             item.id,
                 "produto_id":     item.produto_id,
-                "produto_nome":   item.produto.nome,
+                "produto_nome":   item.nome,
                 "quantidade":     item.quantidade,
                 "preco_unitario": float(item.preco_unitario),
                 "subtotal":       float(item.subtotal),

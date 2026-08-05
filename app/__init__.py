@@ -71,6 +71,13 @@ def create_app():
     from app.pedidos import bp as pedidos_bp
     app.register_blueprint(pedidos_bp, url_prefix="/pedidos")
 
+    from app.ifood import bp as ifood_bp
+    app.register_blueprint(ifood_bp, url_prefix="/ifood")
+
+    from app.food99 import bp as food99_bp
+    app.register_blueprint(food99_bp, url_prefix="/99food")
+
+
     from app.usuarios import bp as usuarios_bp
     app.register_blueprint(usuarios_bp, url_prefix="/usuarios")
 
