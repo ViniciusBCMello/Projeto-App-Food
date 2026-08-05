@@ -1,7 +1,7 @@
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.pedidos import bp
-from app.models import Pedido, ItemPedido, Produto, User, Endereco
+from app.models import Pedido, ItemPedido, Produto, User, Endereco, TransacaoFinanceira
 from app import db
 from datetime import datetime, timezone
 
@@ -132,7 +132,20 @@ def criar():
     pedido.total = total
     db.session.commit()
 
+    transacao = TransacaoFinanceira(
+        tipo="RECEITA",
+        categoria="Pedido",
+        descricao=f"Pedido {pedido.numero}",
+        valor_total=pedido.total,
+        data_vencimento=datetime.now(timezone.utc).date(),
+        status="pendente",
+        pedido_id=pedido.id,
+    )
+    db.session.add(transacao)
+    db.session.commit()
+
     return jsonify(serializar_pedido(pedido)), 201
+
 
 # ─── Listar pedidos ────────────────────────────────────────
 
@@ -229,6 +242,14 @@ def finalizar_entrega(id):
     pedido.entregue = entregue
     if not entregue:
         pedido.motivo_nao_entrega = data.get("motivo", "Sem motivo informado")
+    else:
+        # Confirma o pagamento da receita vinculada a este pedido
+        transacao = TransacaoFinanceira.query.filter_by(
+            pedido_id=pedido.id, tipo="RECEITA", status="pendente"
+        ).first()
+        if transacao:
+            transacao.status = "pago"
+            transacao.data_pagamento = datetime.now(timezone.utc).date()
 
     db.session.commit()
 
@@ -255,6 +276,16 @@ def cancelar(id):
             return jsonify({"erro": "Pedido não pode mais ser cancelado."}), 400
 
     pedido.status = "cancelado"
+    
+    # Cancela a receita vinculada, se existir e ainda não tiver sido cancelada
+    transacao = TransacaoFinanceira.query.filter(
+        TransacaoFinanceira.pedido_id == pedido.id,
+        TransacaoFinanceira.tipo == "RECEITA",
+        TransacaoFinanceira.status != "cancelado",
+    ).first()
+    if transacao:
+        transacao.status = "cancelado"
+
     db.session.commit()
 
     return jsonify({"mensagem": "Pedido cancelado.", "numero": pedido.numero}), 200
