@@ -8,10 +8,10 @@ export default function Footer() {
   const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
-    <footer className="fixed-bottom bg-white border-top py-2 shadow-lg">
-      <Container style={{ maxWidth: '600px' }}>
-        <Row className="text-center g-0 justify-content-center">
-          <Col xs={4}>
+    <footer className="fixed-bottom bg-white border-top py-2 shadow-lg d-lg-none">
+      <Container>
+        <Row className="text-center g-0">
+          <Col>
             <NavLink
               to="/produtos"
               className={({ isActive }) =>
@@ -23,7 +23,7 @@ export default function Footer() {
             </NavLink>
           </Col>
 
-          <Col xs={4}>
+          <Col>
             <NavLink
               to="/meus-pedidos"
               className={({ isActive }) =>
@@ -35,7 +35,7 @@ export default function Footer() {
             </NavLink>
           </Col>
 
-          <Col xs={4}>
+          <Col>
             <NavLink
               to="/carrinho"
               className={({ isActive }) =>
