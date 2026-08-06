@@ -1,18 +1,14 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'; // 👈 Adicionado useQueryClient
 import { api } from '../services/api';
 import { auth } from '../services/auth';
 import type { AxiosError } from 'axios';
 import type {
   AuthResponse,
   LoginCredentials,
-  User, // Antes: Usuario
+  User,
   ApiError,
-  UserRole, // Antes: Cargo
+  UserRole,
 } from '../types';
-
-// ==========================================
-// 1. AUTHENTICATION (/auth)
-// ==========================================
 
 export const useLogin = () => {
   const setAuth = auth((state) => state.setAuth);
@@ -23,7 +19,6 @@ export const useLogin = () => {
       return data;
     },
     onSuccess: (data) => {
-      // Ajustado para data.usuario (conforme sua API retorna) e a tipagem User
       setAuth(data.usuario, data.token);
     },
   });
@@ -39,24 +34,18 @@ export const useAuthMe = () => {
   });
 };
 
-// ==========================================
-// 2. USERS (/usuarios)
-// ==========================================
-
-// List users with optional role filter
 export const useGetUsers = (role?: UserRole) => {
   return useQuery<User[], AxiosError<ApiError>>({
     queryKey: ['users', role],
     queryFn: async () => {
       const { data } = await api.get<User[]>('/usuarios/', {
-        params: { cargo: role }, // A API espera 'cargo' no query param
+        params: { cargo: role },
       });
       return data;
     },
   });
 };
 
-// Get specific user detail by ID
 export const useGetUserById = (id?: number) => {
   return useQuery<User, AxiosError<ApiError>>({
     queryKey: ['users', id],
@@ -68,8 +57,9 @@ export const useGetUserById = (id?: number) => {
   });
 };
 
-// Create new employee/user
 export const useCreateUser = () => {
+  const queryClient = useQueryClient();
+
   return useMutation<
     User,
     AxiosError<ApiError>,
@@ -79,11 +69,15 @@ export const useCreateUser = () => {
       const { data } = await api.post<User>('/usuarios/', newUser);
       return data;
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
   });
 };
 
-// Update existing user
 export const useUpdateUser = () => {
+  const queryClient = useQueryClient();
+
   return useMutation<
     User,
     AxiosError<ApiError>,
@@ -93,11 +87,15 @@ export const useUpdateUser = () => {
       const { data } = await api.put<User>(`/usuarios/${id}`, userData);
       return data;
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
   });
 };
 
-// Toggle active status
 export const useToggleUserStatus = () => {
+  const queryClient = useQueryClient();
+
   return useMutation<
     { mensagem: string; ativo: boolean },
     AxiosError<ApiError>,
@@ -107,14 +105,12 @@ export const useToggleUserStatus = () => {
       const { data } = await api.patch(`/usuarios/${id}/toggle-ativo`);
       return data;
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
   });
 };
 
-// ==========================================
-// 3. LOGGED USER PROFILE
-// ==========================================
-
-// Get own profile
 export const useGetProfile = () => {
   return useQuery<User, AxiosError<ApiError>>({
     queryKey: ['users', 'profile'],
@@ -125,8 +121,9 @@ export const useGetProfile = () => {
   });
 };
 
-// Update own profile
 export const useUpdateProfile = () => {
+  const queryClient = useQueryClient();
+
   return useMutation<
     User,
     AxiosError<ApiError>,
@@ -135,6 +132,10 @@ export const useUpdateProfile = () => {
     mutationFn: async (profileData) => {
       const { data } = await api.put<User>('/usuarios/perfil', profileData);
       return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users', 'profile'] });
+      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
     },
   });
 };

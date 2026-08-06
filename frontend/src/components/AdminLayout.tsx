@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom';
-import Sidebar from '../pages/admin/components/Sidebar'; // O menu que criamos antes
+import Sidebar from '../pages/admin/components/Sidebar';
 
 const AdminLayout = () => {
   return (

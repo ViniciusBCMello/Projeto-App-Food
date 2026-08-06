@@ -81,7 +81,6 @@ export default function AddressSelector({ selectedAddressId, onChange }: Address
 
   return (
     <>
-      {/* CARD DE EXIBIÇÃO NA PÁGINA */}
       <Card className="border-0 shadow-sm p-3 mb-4 bg-white">
         <div className="d-flex justify-content-between align-items-start mb-2">
           <Form.Label className="small fw-bold text-muted m-0">Endereço de Entrega</Form.Label>
@@ -112,7 +111,6 @@ export default function AddressSelector({ selectedAddressId, onChange }: Address
         )}
       </Card>
 
-      {/* MODAL GERENCIADOR */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered scrollable size="lg">
         <Modal.Header closeButton className="border-0 pb-0">
           <Modal.Title className="fw-bold">

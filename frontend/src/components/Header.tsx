@@ -26,7 +26,6 @@ function Header() {
             </NavDropdown>
           </Nav>
         </Navbar.Collapse>
-        {/* por um botao de busca nesssa porra */}
       </Container>
     </Navbar>
   );

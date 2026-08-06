@@ -9,10 +9,6 @@ import type {
   TransactionItem
 } from '../types/finance';
 
-// ==========================================
-// QUERIES
-// ==========================================
-
 export const useRevenue = (filters?: FinanceFilters) => {
   return useQuery<TransactionListResponse, AxiosError>({
     queryKey: ['revenue', filters],
@@ -56,10 +52,6 @@ export const useFinancialSummary = (filters?: Pick<FinanceFilters, 'de' | 'ate'>
     staleTime: 1000 * 60 * 5,
   });
 };
-
-// ==========================================
-// MUTATIONS
-// ==========================================
 
 export const useCreateRevenue = () => {
   const queryClient = useQueryClient();

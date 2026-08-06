@@ -9,13 +9,11 @@ import { useLogin, useCreateUser } from '../hooks/useLogin';
 
 function Login() {
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true); // Toggle entre Login e Cadastro
+  const [isLogin, setIsLogin] = useState(true);
 
-  // Hooks do React Query
   const loginMutation = useLogin();
   const registerMutation = useCreateUser();
 
-  // Estados dos campos
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nome, setNome] = useState('');
@@ -26,7 +24,6 @@ function Login() {
     e.preventDefault();
 
     if (isLogin) {
-      // Lógica de Login
       loginMutation.mutate(
         { email, senha: password },
         {
@@ -34,7 +31,6 @@ function Login() {
         }
       );
     } else {
-      // Lógica de Cadastro (Cargo padrão: cliente)
       registerMutation.mutate(
         {
           nome,
@@ -54,7 +50,6 @@ function Login() {
     }
   };
 
-  // Tratamento de erro unificado
   const currentError = isLogin ? loginMutation.error : registerMutation.error;
   const isPending = loginMutation.isPending || registerMutation.isPending;
 

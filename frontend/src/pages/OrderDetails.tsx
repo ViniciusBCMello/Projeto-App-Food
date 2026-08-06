@@ -6,7 +6,6 @@ import type { Order } from '../types';
 
 import CartItem from '../components/CartItem';
 import Placeholder from "../assets/hamburg.png";
-// import { BACKEND_URL } from '../config/config';
 
 export default function OrderDetails() {
   const { id } = useParams<{ id: string }>();
