@@ -219,7 +219,6 @@ def editar_whitelabel():
 # ─── Taxa de entrega ────────────────────────────────────────
 
 @bp.route("/taxa-entrega", methods=["GET"])
-@jwt_required()
 def get_taxa():
     """Retorna a taxa configurada e calcula o valor para uma distância."""
     empresa    = Empresa.query.first()

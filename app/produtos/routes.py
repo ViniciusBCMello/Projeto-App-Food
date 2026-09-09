@@ -35,7 +35,6 @@ def servir_imagem(filename):
 # ─── Categorias ────────────────────────────────────────────
 
 @bp.route("/categorias", methods=["GET"])
-@jwt_required()
 def listar_categorias():
     categorias = Categoria.query.filter_by(ativa=True).order_by(Categoria.nome).all()
     return jsonify([
@@ -111,7 +110,6 @@ def excluir_categoria(id):
 # ─── Produtos ──────────────────────────────────────────────
 
 @bp.route("/", methods=["GET"])
-@jwt_required()
 def listar():
     categoria_id = request.args.get("categoria_id", type=int)
     query = Produto.query
@@ -137,7 +135,6 @@ def listar():
 
 
 @bp.route("/<int:id>", methods=["GET"])
-@jwt_required()
 def detalhe(id):
     p = db.session.get(Produto, id)
     if not p:
@@ -175,10 +172,10 @@ def criar():
     if "imagem" in request.files:
         arquivo = request.files["imagem"]
         if arquivo and extensao_permitida(arquivo.filename):
+            pasta_uploads = current_app.config["UPLOAD_FOLDER"]
+            os.makedirs(pasta_uploads, exist_ok=True)
             ext      = arquivo.filename.rsplit(".", 1)[1].lower()
             filename = f"{uuid.uuid4().hex}.{ext}"
-            pasta_uploads = os.path.join(current_app.root_path, 'uploads')  
-            os.makedirs(pasta_uploads, exist_ok=True)    
             caminho = os.path.join(pasta_uploads, filename)
             arquivo.save(caminho)
             imagem_url = filename
@@ -217,7 +214,7 @@ def editar(id):
     if "imagem" in request.files:
         arquivo = request.files["imagem"]
         if arquivo and extensao_permitida(arquivo.filename):
-            pasta_uploads = os.path.join(current_app.root_path, 'uploads')
+            pasta_uploads = current_app.config["UPLOAD_FOLDER"]
             os.makedirs(pasta_uploads, exist_ok=True)
             
             if produto.imagem_url:
@@ -252,8 +249,13 @@ def excluir(id):
         return jsonify({"erro": "Produto não encontrado."}), 404
 
     # deleta imagem do servidor
-    if produto.imagem_url and os.path.exists(produto.imagem_url):
-        os.remove(produto.imagem_url)
+    if produto.imagem_url:
+        caminho = os.path.join(current_app.config["UPLOAD_FOLDER"], produto.imagem_url)
+        if os.path.exists(caminho):
+            try:
+                os.remove(caminho)
+            except Exception as e:
+                print(f"Erro ao deletar imagem do produto {id}: {e}")
 
     db.session.delete(produto)
     db.session.commit()
