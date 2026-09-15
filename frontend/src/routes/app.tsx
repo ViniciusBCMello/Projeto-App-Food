@@ -4,6 +4,7 @@ import Login from '../pages/Login';
 import Cart from '../pages/Cart';
 import Orders from '../pages/Orders';
 import OrderDetails from '../pages/OrderDetails';
+import StoreProfile from '../pages/StoreProfile';
 
 const appRoutes = [
   {
@@ -29,6 +30,10 @@ const appRoutes = [
   {
     path: 'pedidos/:id',
     element: <OrderDetails />
+  },
+  {
+    path: 'perfil-loja',
+    element: <StoreProfile />
   },
 ];
 

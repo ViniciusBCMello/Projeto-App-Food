@@ -16,6 +16,8 @@ const UsersDashboard = lazy(() => import('../pages/admin/dashboards/Users'));
 
 const SettingsDashboard = lazy(() => import('../pages/admin/dashboards/Settings'));
 
+const CategoriesDashboard = lazy(() => import('../pages/admin/dashboards/Categories'));
+
 const DashboardFallback = ProgressBar;
 
 const adminRoutes: RouteObject[] = [
@@ -101,6 +103,14 @@ const adminRoutes: RouteObject[] = [
     element: (
       <Suspense fallback={<DashboardFallback />}>
         <SettingsDashboard />
+      </Suspense>
+    )
+  },
+  {
+    path: 'categorias',
+    element: (
+      <Suspense fallback={<DashboardFallback />}>
+        <CategoriesDashboard />
       </Suspense>
     )
   },

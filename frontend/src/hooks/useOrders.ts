@@ -21,6 +21,7 @@ export const useOrders = (status?: OrderStatus) => {
     queryKey: ['orders', status],
     queryFn: async () => {
       const { data } = await api.get('/pedidos/', { params: { status } });
+      console.log("order data", data);
       return data;
     },
     staleTime: 1000 * 30,
