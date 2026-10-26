@@ -38,6 +38,37 @@ def serializar_empresa(e):
         "wl_rodape_texto":   e.wl_rodape_texto,
     }
 
+def serializar_empresa_publica(e):
+    """
+    Versão do perfil da empresa segura para expor sem login — usada pela
+    tela "conhecer a loja" do app. Deixa de fora CNPJ, razão social e
+    e-mail interno, que não têm por que ficar públicos.
+    """
+    return {
+        "nome_fantasia": e.nome_fantasia,
+        "telefone":      e.telefone,
+        "endereco": {
+            "cep":        e.cep,
+            "logradouro": e.logradouro,
+            "numero":     e.numero,
+            "bairro":     e.bairro,
+            "cidade":     e.cidade,
+            "estado":     e.estado,
+        },
+        "entrega": {
+            "taxa_por_km":        float(e.taxa_por_km) if e.taxa_por_km else float(TAXA_KM_PADRAO),
+            "distancia_gratuita": float(DISTANCIA_GRATUITA),
+        },
+        # identidade visual — pro app já pintar a tela da loja certo
+        "visual": {
+            "nome_sistema":   e.wl_nome_sistema,
+            "cor_primaria":   e.wl_cor_primaria,
+            "cor_secundaria": e.wl_cor_secundaria,
+            "logo_url":       e.wl_logo_url,
+            "rodape_texto":   e.wl_rodape_texto,
+        },
+    }
+
 
 def serializar_forma(f):
     return {
@@ -68,6 +99,14 @@ def get_empresa():
         return jsonify({"erro": "Empresa não cadastrada ainda."}), 404
     return jsonify(serializar_empresa(empresa)), 200
 
+# ─── Perfil público (sem login) — tela "conhecer a loja" ────
+
+@bp.route("/perfil-publico", methods=["GET"])
+def get_perfil_publico():
+    empresa = Empresa.query.first()
+    if not empresa:
+        return jsonify({"erro": "Empresa não cadastrada ainda."}), 404
+    return jsonify(serializar_empresa_publica(empresa)), 200
 
 # ─── Onboarding — criar empresa (time comercial) ───────────
 
