@@ -11,6 +11,7 @@ build/
 
 # environment
 .env*.local
+.env
 
 # logs
 npm-debug.log*
@@ -19,3 +20,10 @@ yarn-error.log*
 
 # misc
 .DS_Store
+
+# python/backend
+.venv/
+__pycache__/
+*.pyc
+instance/
+uploads/
