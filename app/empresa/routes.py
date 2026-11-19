@@ -45,7 +45,6 @@ def serializar_empresa_publica(e):
     e-mail interno, que não têm por que ficar públicos.
     """
     return {
-        "id":            e.id,
         "nome_fantasia": e.nome_fantasia,
         "telefone":      e.telefone,
         "endereco": {
@@ -107,13 +106,6 @@ def get_perfil_publico():
     empresa = Empresa.query.first()
     if not empresa:
         return jsonify({"erro": "Empresa não cadastrada ainda."}), 404
-    return jsonify(serializar_empresa_publica(empresa)), 200
-
-@bp.route("/<int:id>/perfil-publico", methods=["GET"])
-def get_perfil_publico_por_id(id):
-    empresa = db.session.get(Empresa, id)
-    if not empresa:
-        return jsonify({"erro": "Loja não encontrada."}), 404
     return jsonify(serializar_empresa_publica(empresa)), 200
 
 # ─── Onboarding — criar empresa (time comercial) ───────────
